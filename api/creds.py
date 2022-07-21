@@ -5,7 +5,7 @@ from coinbase.wallet.client import Client as cb_Client
 from configparser import ConfigParser
 from typing import Union
 
-def client_connect(api, log=False, config='./config/config.ini') -> Union[cb_Client, tda_Client]:
+def client_connect(api, cfg, log=False) -> Union[cb_Client, tda_Client]:
     '''
         Returns a client connection to Coinbase API or TD Ameritrade API and 
         authenticates the connection with the given keys accordingly. 
@@ -23,7 +23,7 @@ def client_connect(api, log=False, config='./config/config.ini') -> Union[cb_Cli
     '''
     logging.getLogger('').addHandler(logging.StreamHandler())
     config = ConfigParser()
-    config.read('private/config.ini')
+    config.read(cfg)
     API_KEY = config.get(f'{api}_AUTH', 'API_KEY')
     if api == 'TDA':
         REDIRECT = config.get(f'{api}_AUTH', 'REDIRECT')
@@ -36,7 +36,7 @@ def client_connect(api, log=False, config='./config/config.ini') -> Union[cb_Cli
                 client = auth.client_from_login_flow(
                     driver, API_KEY, REDIRECT, TOKEN_PATH)
         return client
-    elif api == 'COINBASE':
-        API_SECRET = config.get('COINBASE_AUTH', 'API_SECRET')
+    elif api == 'CB':
+        API_SECRET = config.get(f'{api}_AUTH', 'API_SECRET')
         client = cb_Client(API_KEY, API_SECRET)
         return client
