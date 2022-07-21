@@ -1,1 +1,1 @@
-# market-bot
+# MarketBot
