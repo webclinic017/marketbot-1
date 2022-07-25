@@ -7,11 +7,11 @@ from typing import Union
 
 def client_connect(api, cfg, log=False) -> Union[cb_Client, tda_Client]:
     '''
-        Returns a client connection to Coinbase API or TD Ameritrade API and 
+        Returns a client connection to the given api and 
         authenticates the connection with the given keys accordingly. 
 
         Args:
-            api (string) : the api to connect to (either 'TDA' or 'COINBASE')
+            api (string) : the api to connect to (e.g. 'TDA' or 'CB')
             log (bool) : enable/disable logging for debugging authentication
             config (string) : path to the config file with auth keys 
         

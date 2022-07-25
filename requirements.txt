@@ -6,3 +6,5 @@ logging
 pytest
 configparser
 backtrader
+quantlib
+ta-lib
