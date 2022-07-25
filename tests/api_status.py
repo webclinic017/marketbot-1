@@ -17,8 +17,8 @@ except:
     print('Coinbase:       DOWN')
 
 # TODO:
-try:
-    raise(ConnectionError)
-    print('Kraken:          UP')
-except:
-    print('Kraken:         DOWN')
+# try:
+#     raise(ConnectionError)
+#     print('Kraken:          UP')
+# except:
+#     print('Kraken:         DOWN')
