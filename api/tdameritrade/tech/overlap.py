@@ -10,7 +10,7 @@ import json
 
 def BBANDS(client : Client, stock : string, period_type : Client.PriceHistory.PeriodType, 
         period : Client.PriceHistory.Period, frequency_type : Client.PriceHistory.FrequencyType,
-        frequency : Client.PriceHistory.Frequency) -> tuple:
+        frequency : Client.PriceHistory.Frequency, ma_type) -> tuple:
     '''
         Returns Bollinger Bands for specified stock, period, and frequency.
 
@@ -35,10 +35,14 @@ def BBANDS(client : Client, stock : string, period_type : Client.PriceHistory.Pe
     for day in candles:
         date.append(day['datetime'])
     
-    upper, middle, lower = ta.BBANDS(np.array(close), matype=ta.MA_Type.EMA)
+    upper, middle, lower = ta.BBANDS(np.array(close), matype=ma_type)
 
+<<<<<<< refs/remotes/origin/main
 <<<<<<< refs/remotes/origin/main
     return (date, upper, middle, lower)
 =======
     return (date, close, upper, middle, lower)
+>>>>>>> Update README
+=======
+    return date, upper, middle, lower
 >>>>>>> Update README
