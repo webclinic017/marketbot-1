@@ -2,6 +2,10 @@ import string
 import talib as ta
 from tda.client import Client
 import numpy as np
+<<<<<<< refs/remotes/origin/main
+=======
+import datetime
+>>>>>>> Update README
 import json 
 
 def BBANDS(client : Client, stock : string, period_type : Client.PriceHistory.PeriodType, 
@@ -33,4 +37,8 @@ def BBANDS(client : Client, stock : string, period_type : Client.PriceHistory.Pe
     
     upper, middle, lower = ta.BBANDS(np.array(close), matype=ta.MA_Type.EMA)
 
+<<<<<<< refs/remotes/origin/main
     return (date, upper, middle, lower)
+=======
+    return (date, close, upper, middle, lower)
+>>>>>>> Update README

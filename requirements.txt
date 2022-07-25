@@ -7,4 +7,9 @@ pytest
 configparser
 backtrader
 quantlib
+<<<<<<< refs/remotes/origin/main
 ta-lib
+=======
+ta-lib
+xgboost
+>>>>>>> Update README
