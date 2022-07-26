@@ -1,3 +1,4 @@
+from datetime import datetime
 from tda.client.synchronous import Client as TDA_Client
 from coinbase.wallet.client import Client as CB_Client
 import pandas as pd
@@ -5,15 +6,12 @@ from pandas import DataFrame
 import json
 import talib as ta
 import inspect
+import numpy as np
+import datetime
+from typing import Union, get_args
 
-def download_data(client : TDA_Client, log=False, **kwargs):
+def download_data(client : Union[TDA_Client, CB_Client], log=False, **kwargs):
     if isinstance(client, TDA_Client):
-        stock = kwargs['stock']
-        period = kwargs['period']
-        period_type = kwargs['period_type']
-        frequency = kwargs['frequency']
-        frequency_type = kwargs['frequency_type']
-
         all_frequencies = {
             'ONE_MIN': client.PriceHistory.Frequency.EVERY_MINUTE,
             'FIVE_MIN': client.PriceHistory.Frequency.EVERY_FIVE_MINUTES,
@@ -54,31 +52,67 @@ def download_data(client : TDA_Client, log=False, **kwargs):
             'YEAR': client.PriceHistory.PeriodType.YEAR,
             'YEAR_TO_DATE': client.PriceHistory.PeriodType.YEAR_TO_DATE
         }
+        params = {
+            'symbol': kwargs['symbol'], 
+            'period_type': all_period_types[kwargs['period_type']], 
+            'period': all_periods[kwargs['period']], 
+            'frequency_type': all_frequency_types[kwargs['frequency_type']], 
+            'frequency': all_frequencies[kwargs['frequency']],
+            'need_extended_hours_data': 'true'
+        }
+        payload = { key: val for key, val in params.items() if val!=None}
 
-        price_history = client.get_price_history(stock, 
-                            period_type=all_period_types[period_type], 
-                            period=all_periods[period], 
-                            frequency=all_frequencies[frequency]
-                        )
+        data = json.dumps(client.get_price_history(**payload).json(), indent=4)
+        return data
+    # TODO: Coinbase API Compatibility
+    # elif isinstance(client, CB_Client):
+    # TODO: Kraken API Compatibility
 
-        return price_history.json()
 
 def extract_features(features : list, json_string : str) -> DataFrame:
     data = json.loads(json_string)
+    vars = {
+        'open': np.array([ candle['open'] for candle in data['candles'] ]),
+        'close': np.array([ candle['close'] for candle in data['candles'] ]),
+        'high': np.array([ candle['high'] for candle in data['candles'] ]),
+        'low': np.array([ candle['low'] for candle in data['candles'] ]),
+        'volume': np.array([ candle['volume'] for candle in data['candles'] ]),
+        'datetime': np.array([ candle['datetime'] for candle in data['candles'] ])
+    }
+    time_period = len(vars['open'])
+
+    df = DataFrame.from_dict(vars)
+
+    ################################################################
+    # TODO: extract all necessary values for the possible          #
+    #       parameters for features                                #
+    #   possible params:                                           #
+    #	    required: close, periods, high, low, open, volume      #
+    #	    optional: timeperiod, minperiod, maxperiod, matype,    #
+    #                 acceleration, maximumu, fastperiod,          #
+    #                 slowperiod, signal period, fastmatype,       #
+    #                 slowmatype, signalmatype, fastk_period,      #
+    #                 slowk_period, slowk_matype, slowd_period,    #
+    #                 slowd_matype, timeperiod1, timeperiod2,      #
+    #                 timeperiod3, penetration                     #
+    ################################################################
+
     for func in features:
         if func in ta.get_functions():
-            feature = getattr(ta, func)
-            params = inspect.getargspec(feature)
-            # TODO: extract all necessary values for the possible 
-            #       parameters for features
-            #   possible params:
-            #	    required: close, periods, high, low, open, volume
-            #	    optional: timeperiod, minperiod, maxperiod, matype, 
-            #                 acceleration, maximumu, fastperiod, 
-            #                 slowperiod, signal period, fastmatype, 
-            #                 slowmatype, signalmatype, fastk_period, 
-            #                 slowk_period, slowk_matype, slowd_period, 
-            #                 slowd_matype, timeperiod1, timeperiod2, 
-            #                 timeperiod3, penetration
-    return None
-
+            if func == 'BBANDS':
+                upperband, middleband, lowerband = getattr(ta, 'BBANDS')(vars['close'], timeperiod=30)
+                vars['BBANDS'] = {
+                    'UPPER' : upperband,
+                    'MIDDLE' : middleband,
+                    'LOWER' : lowerband
+                }
+            elif func == 'DEMA':
+                vars['DEMA'] = getattr(ta, 'DEMA')(vars['close'])
+            elif func == 'EMA':
+                vars['EMA'] = getattr(ta, 'EMA')(vars['close'])
+            elif func == 'HT_TRENDLINE':
+                vars['HT_TRENDLINE'] = getattr(ta, 'HT_TRENDLINE')(vars['close'])
+            elif func == 'KAMA':
+                vars['KAMA'] = getattr(ta, 'KAMA')(vars['close'])
+            elif func == 'MA':
+                vars['MA'] = getattr(ta, 'MA')(vars['close'])

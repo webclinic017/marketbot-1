@@ -1,4 +1,6 @@
 from api.creds import client_connect
+import krakenex
+from pykrakenapi import KrakenAPI
 
 print('      API      STATUS')
 
@@ -16,9 +18,10 @@ try:
 except:
     print('Coinbase:       DOWN')
 
-# TODO:
-# try:
-#     raise(ConnectionError)
-#     print('Kraken:          UP')
-# except:
-#     print('Kraken:         DOWN')
+try:
+    api = krakenex.API()
+    k = KrakenAPI(api)
+    ohlc, last = k.get_ohlc_data("BCHUSD")
+    print('Kraken:          UP')
+except:
+    print('Kraken:         DOWN')

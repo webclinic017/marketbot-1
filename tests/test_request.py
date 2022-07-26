@@ -9,4 +9,5 @@ r = c.get_price_history('AAPL',
         frequency=client.Client.PriceHistory.Frequency.DAILY
     )
 assert r.status_code == 200, r.raise_for_status()
-print(json.dumps(r.json(), indent=4))
+# print(json.dumps(r.json(), indent=4))
+print('SUCCESS')

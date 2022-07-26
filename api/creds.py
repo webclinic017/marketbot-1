@@ -4,6 +4,8 @@ from tda.auth import Client as TDA_Client
 from coinbase.wallet.client import Client as CB_Client
 from configparser import ConfigParser
 from typing import Union
+from pykrakenapi import KrakenAPI
+import krakenex
 
 def client_connect(api, cfg, log=False) -> Union[CB_Client, TDA_Client]:
     '''

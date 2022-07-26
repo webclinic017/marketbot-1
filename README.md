@@ -1,5 +1,5 @@
 # MarketBot
 #### API SUPPORT:
-* [x] Coinbase
+* [ ] Coinbase
 * [x] TD Ameritrade
 * [ ] Kraken
