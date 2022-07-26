@@ -5,10 +5,9 @@ import pandas as pd
 from pandas import DataFrame
 import json
 import talib as ta
-import inspect
 import numpy as np
-import datetime
-from typing import Union, get_args
+from typing import Union
+from tqdm import tqdm
 
 def download_data(client : Union[TDA_Client, CB_Client], log=False, **kwargs):
     if isinstance(client, TDA_Client):
@@ -77,12 +76,30 @@ def extract_features(features : list, json_string : str) -> DataFrame:
         'high': np.array([ candle['high'] for candle in data['candles'] ]),
         'low': np.array([ candle['low'] for candle in data['candles'] ]),
         'volume': np.array([ candle['volume'] for candle in data['candles'] ]),
-        'datetime': np.array([ candle['datetime'] for candle in data['candles'] ])
+        'datetime': np.array([ pd.to_datetime(candle['datetime'], unit='ms') for candle in data['candles'] ])
     }
-    time_period = len(vars['open'])
 
+    for func in tqdm(features):
+        if func in ta.get_functions():
+            if func == 'BBANDS':
+                upperband, middleband, lowerband = getattr(ta, 'BBANDS')(vars['close'], matype=ta.MA_Type.EMA)
+                vars['UPPER_BBAND'] = upperband
+                vars['MIDDLE_BBAND'] = middleband
+                vars['LOWER_BBAND'] = lowerband
+            elif func == 'DEMA':
+                vars['DEMA'] = getattr(ta, 'DEMA')(vars['close'])
+            elif func == 'EMA':
+                vars['EMA'] = getattr(ta, 'EMA')(vars['close'])
+            elif func == 'HT_TRENDLINE':
+                vars['HT_TRENDLINE'] = getattr(ta, 'HT_TRENDLINE')(vars['close'])
+            elif func == 'KAMA':
+                vars['KAMA'] = getattr(ta, 'KAMA')(vars['close'])
+            elif func == 'MA':
+                vars['MA'] = getattr(ta, 'MA')(vars['close'], matype=ta.MA_Type.EMA)
+            else: pass
     df = DataFrame.from_dict(vars)
-
+    df.index = df['datetime']
+    return df
     ################################################################
     # TODO: extract all necessary values for the possible          #
     #       parameters for features                                #
@@ -96,23 +113,3 @@ def extract_features(features : list, json_string : str) -> DataFrame:
     #                 slowd_matype, timeperiod1, timeperiod2,      #
     #                 timeperiod3, penetration                     #
     ################################################################
-
-    for func in features:
-        if func in ta.get_functions():
-            if func == 'BBANDS':
-                upperband, middleband, lowerband = getattr(ta, 'BBANDS')(vars['close'], timeperiod=30)
-                vars['BBANDS'] = {
-                    'UPPER' : upperband,
-                    'MIDDLE' : middleband,
-                    'LOWER' : lowerband
-                }
-            elif func == 'DEMA':
-                vars['DEMA'] = getattr(ta, 'DEMA')(vars['close'])
-            elif func == 'EMA':
-                vars['EMA'] = getattr(ta, 'EMA')(vars['close'])
-            elif func == 'HT_TRENDLINE':
-                vars['HT_TRENDLINE'] = getattr(ta, 'HT_TRENDLINE')(vars['close'])
-            elif func == 'KAMA':
-                vars['KAMA'] = getattr(ta, 'KAMA')(vars['close'])
-            elif func == 'MA':
-                vars['MA'] = getattr(ta, 'MA')(vars['close'])
