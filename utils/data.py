@@ -9,6 +9,7 @@ import numpy as np
 from typing import Union
 from tqdm import tqdm
 import logging
+import os
 
 def download_data(client : Union[TDA_Client, CB_Client], log=False, **kwargs):
     if isinstance(client, TDA_Client):
@@ -60,8 +61,7 @@ def download_data(client : Union[TDA_Client, CB_Client], log=False, **kwargs):
             'frequency': all_frequencies[kwargs['frequency']],
             'need_extended_hours_data': 'true'
         }
-        payload = { key: val for key, val in params.items() if val!=None}
-
+        payload = { key: val for key, val in params.items() if val != None } 
         data = json.dumps(client.get_price_history(**payload).json(), indent=4)
         return data
     # TODO: Coinbase API Compatibility
@@ -69,8 +69,10 @@ def download_data(client : Union[TDA_Client, CB_Client], log=False, **kwargs):
     # TODO: Kraken API Compatibility
 
 
-def extract_features(features : list, json_string : str) -> DataFrame:
+def extract_features(features : list, json_string : str, api : str, save=False) -> DataFrame:
     data = json.loads(json_string)
+    symbol = data['symbol']
+    
     vars = {
         'open': np.array([ candle['open'] for candle in data['candles'] ]),
         'close': np.array([ candle['close'] for candle in data['candles'] ]),
@@ -98,9 +100,23 @@ def extract_features(features : list, json_string : str) -> DataFrame:
             elif func == 'MA':
                 vars['MA'] = getattr(ta, 'MA')(vars['close'], matype=ta.MA_Type.EMA)
             else: pass
+
     df = DataFrame.from_dict(vars)
     df.index = df['datetime']
-    return df
+    df.drop('datetime', axis='columns', inplace=True)
+    start_date = str(df.index[0])[0:10]
+    end_date = str(df.index[-1])[0:10]
+
+    if save:
+        if os.path.exists(f'data/{api}/{symbol}/'):
+            pd.DataFrame.to_csv(df, f'data/{api}/{symbol}/{symbol}_{start_date}_{end_date}.csv')
+            return df
+        else:
+            os.makedirs(f'data/{api}/{symbol}/')
+            pd.DataFrame.to_csv(df, f'data/{api}/{symbol}/{symbol}_{start_date}_{end_date}.csv')
+            return df
+    else:
+        return df
     ################################################################
     # TODO: extract all necessary values for the possible          #
     #       parameters for features                                #

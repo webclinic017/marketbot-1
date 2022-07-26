@@ -1,4 +1,4 @@
-from utils.get_data import download_data, extract_features
+from utils.data import download_data, extract_features
 from api.creds import client_connect
 from tda.client import Client
 import json
@@ -17,7 +17,7 @@ _ = json.loads(data)    # test for valid json
 # test extracting features into dataframe
 print('Extracting features...')
 ext_start = time.time()
-df = extract_features([ 'BBANDS', 'DEMA', 'EMA', 'HT_TRENDLINE', 'KAMA', 'MA' ], data)
+df = extract_features([ 'BBANDS', 'DEMA', 'EMA', 'HT_TRENDLINE', 'KAMA', 'MA' ], data, api='TDA', save=True)
 # df = extract_features([ _ for _ in get_functions() ], data)
 print(f'Features extracted! (time elapsed: {time.time() - ext_start} seconds)')
 print(df)

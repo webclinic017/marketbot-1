@@ -163,3 +163,4 @@ cython_debug/
 *.DS_Store
 token.pkl
 .vscode/
+NOTES.md
