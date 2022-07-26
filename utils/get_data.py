@@ -8,6 +8,7 @@ import talib as ta
 import numpy as np
 from typing import Union
 from tqdm import tqdm
+import logging
 
 def download_data(client : Union[TDA_Client, CB_Client], log=False, **kwargs):
     if isinstance(client, TDA_Client):
