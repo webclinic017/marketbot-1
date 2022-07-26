@@ -7,7 +7,7 @@ pytest
 configparser
 backtrader
 quantlib
-ta-lib
+talib
 xgboost
 pykrakenapi
 krakenex
