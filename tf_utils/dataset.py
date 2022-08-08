@@ -1,10 +1,11 @@
 import tensorflow as tf
 import pandas as pd
+import numpy as np
 from utils.data import download_data, extract_features
 
 class StockDataSet(object):
     def __init__(self,
-                 symbols : list,
+                 symbol : str,
                  data_path : str,
                  input_size=1,
                  num_steps=30,
@@ -18,7 +19,8 @@ class StockDataSet(object):
         self.close_price_only = close_price_only
         self.normalized = normalized
         data = pd.read_csv(data_path)
-        self.features = [ feat for feat in data.columns() ]
+        if normalized:
+            data = np.log(data) - np.log(data.shift(1))
         pass
 
     def info(self):

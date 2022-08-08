@@ -82,9 +82,8 @@ def extract_features(features : dict, json_string : str, api : str, normalize=Tr
         'volume': np.array([ candle['volume'] for candle in data['candles'] ]),
         'datetime': np.array([ pd.to_datetime(candle['datetime'], unit='ms') for candle in data['candles'] ])
     }
-
+    # use ta-lib to calculate features given as input 
     for func, params in tqdm(features.items()):
-        # use ta-lib to calculate features given as input 
         if func in ta.get_functions():
             # ta-lib overlap studies
             if func == 'BBANDS':
@@ -353,16 +352,3 @@ def extract_features(features : dict, json_string : str, api : str, normalize=Tr
             return df
     else:
         return df
-    ################################################################
-    # TODO: extract all necessary values for the possible          #
-    #       parameters for features                                #
-    #   possible params:                                           #
-    #	    required: close, periods, high, low, open, volume      #
-    #	    optional: timeperiod, minperiod, maxperiod, matype,    #
-    #                 acceleration, maximumu, fastperiod,          #
-    #                 slowperiod, signal period, fastmatype,       #
-    #                 slowmatype, signalmatype, fastk_period,      #
-    #                 slowk_period, slowk_matype, slowd_period,    #
-    #                 slowd_matype, timeperiod1, timeperiod2,      #
-    #                 timeperiod3, penetration                     #
-    ################################################################

@@ -5,6 +5,7 @@ import json
 import pandas as pd
 from talib import get_functions
 import time
+import numpy as np
 
 tda_client = client_connect('TDA', 'private/creds.ini')
 # data = download_data(tda_client, symbol='NVDA', period='ONE_YEAR', period_type='YEAR', frequency='DAILY', frequency_type='DAILY')
@@ -17,7 +18,7 @@ _ = json.loads(data)    # test for valid json
 # test extracting features into dataframe
 print('Extracting features...')
 ext_start = time.time()
-df = extract_features({ 'BBANDS': {}, 'EMA': {}, 'ATR': {}, 'ADX': {}, 'CCI': {}, 'ROC': {}, 'RSI': {}, 'WILLR': {}, 'STOCH': {} }, data, api='TDA', save=True)
+df = extract_features({ 'BBANDS': {}, 'EMA': {}, 'ATR': {}, 'ADX': {}, 'CCI': {}, 'ROC': {}, 'RSI': {}, 'WILLR': {}, 'STOCH': {}, 'CDL2CROWS': {} }, data, api='TDA', save=True)
 # df = extract_features([ _ for _ in get_functions() ], data)
 print(f'Features extracted! (time elapsed: {time.time() - ext_start} seconds)')
-print(df)
+print(np.log(df) - np.log(df.shift(1)))
