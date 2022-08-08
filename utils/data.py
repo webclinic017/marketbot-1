@@ -1,5 +1,3 @@
-from datetime import datetime
-from webbrowser import get
 from tda.client.synchronous import Client as TDA_Client
 from coinbase.wallet.client import Client as CB_Client
 import pandas as pd
@@ -82,6 +80,9 @@ def extract_features(features : dict, json_string : str, api : str, normalize=Tr
         'volume': np.array([ candle['volume'] for candle in data['candles'] ]),
         'datetime': np.array([ pd.to_datetime(candle['datetime'], unit='ms') for candle in data['candles'] ])
     }
+
+    vars['volume'] = vars['volume'].astype(np.float)
+
     # use ta-lib to calculate features given as input 
     for func, params in tqdm(features.items()):
         if func in ta.get_functions():
