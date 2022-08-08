@@ -18,9 +18,7 @@ class StockDataSet(object):
         self.test_ratio = test_ratio
         self.close_price_only = close_price_only
         self.normalized = normalized
-        data = pd.read_csv(data_path)
-        if normalized:
-            data = np.log(data) - np.log(data.shift(1))
+        self.data = pd.read_csv(data_path)
         pass
 
     def info(self):
@@ -28,6 +26,9 @@ class StockDataSet(object):
             self.stock_sym, len(self.train_X), len(self.test_y))
 
     def _prepare_data(self, seq):
+        if self.normalized:
+            self.data = np.log(self.data) - np.log(self.data.shift(1))
+        
         pass
 
     def generate_one_epoch(self, batch_size):

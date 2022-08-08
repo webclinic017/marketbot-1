@@ -92,9 +92,9 @@ def extract_features(features : dict, json_string : str, api : str, normalize=Tr
                 vars['MIDDLE_BBAND'] = middleband
                 vars['LOWER_BBAND'] = lowerband
             elif func == 'DEMA':
-                vars['DEMA'] = getattr(ta, 'DEMA')(vars['close'], **params)
+                vars['DEMA'] = ta.DEMA(vars['close'], **params)
             elif func == 'EMA':
-                vars['EMA'] = getattr(ta, 'EMA')(vars['close'], **params)
+                vars['EMA'] = ta.EMA(vars['close'], **params)
             elif func == 'HT_TRENDLINE':
                 vars['HT_TRENDLINE'] = getattr(ta, 'HT_TRENDLINE')(vars['close'], **params)
             elif func == 'KAMA':
