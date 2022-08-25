@@ -18,6 +18,9 @@ _ = json.loads(data)    # test for valid json
 # test extracting features into dataframe
 print('Extracting features...')
 ext_start = time.time()
-df = extract_features({ 'BBANDS': {}, 'EMA': {}, 'ATR': {}, 'ADX': {}, 'CCI': {}, 'ROC': {}, 'RSI': {}, 'WILLR': {}, 'STOCH': {}, 'CDL2CROWS': {} }, data, api='TDA', save=True)
+df = extract_features(features={ 
+                                'BBANDS': {}, 'EMA': {}, 'ATR': {}, 'ADX': {}, 'CCI': {}, 
+                                'ROC': {}, 'RSI': {}, 'WILLR': {}, 'STOCH': {}, 'CDL2CROWS': {} 
+                    }, data=data, api='TDA', save=True)
 print(f'Features extracted! (time elapsed: {time.time() - ext_start} seconds)')
 print(df)

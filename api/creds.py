@@ -7,15 +7,15 @@ from typing import Union
 from pykrakenapi import KrakenAPI
 import krakenex
 
-def client_connect(api, cfg, log=False) -> Union[CB_Client, TDA_Client]:
+def client_connect(api: str, cfg: str, log=False) -> Union[CB_Client, TDA_Client]:
     '''
         Returns a client connection to the given api and 
         authenticates the connection with the given keys accordingly. 
 
         Args:
             api (str) : the api to connect to (e.g. 'TDA' or 'CB')
-            log (bool) : enable/disable logging for debugging authentication
             cfg (str) : path to the config file with api keys 
+            log (bool) : enable/disable logging for debugging authentication
         
         Returns:
             A Client object from either the TDA API or the Coinbase API

@@ -4,6 +4,7 @@ import pandas as pd
 from pandas import DataFrame
 import json
 import talib as ta
+import inspect
 import numpy as np
 from typing import Union
 from tqdm import tqdm
@@ -64,12 +65,11 @@ def download_data(client : Union[TDA_Client, CB_Client, ], log=False, **kwargs):
         data = json.dumps(client.get_price_history(**payload).json(), indent=4)
         return data
     # TODO: Coinbase API Compatibility
-    # elif isinstance(client, CB_Client):
-    # TODO: Kraken API Compatibility
+    # TODO: Coin Market Data API Compatibility
 
 
-def extract_features(features : dict, json_string : str, api : str, normalize=True, save=False) -> DataFrame:
-    data = json.loads(json_string)
+def extract_features(features : dict, data : str, api : str, normalize=True, save=False) -> DataFrame:
+    data = json.loads(data)
     symbol = data['symbol']
     
     vars = {
@@ -82,6 +82,13 @@ def extract_features(features : dict, json_string : str, api : str, normalize=Tr
     }
 
     vars['volume'] = vars['volume'].astype(np.float)
+    days_to_fix = 0
+    for func, params in features.items():
+        if 'timeperiod' in params.keys():
+            days_to_fix = max(days_to_fix, params['timeperiod'])
+        else:
+            days_to_fix = max(inspect.signature(getattr(ta, func)).parameters['timeperiod'])
+    
 
     # use ta-lib to calculate features given as input 
     for func, params in tqdm(features.items()):
@@ -103,32 +110,32 @@ def extract_features(features : dict, json_string : str, api : str, normalize=Tr
             elif func == 'MA':
                 vars['MA'] = getattr(ta, 'MA')(vars['close'], **params)
             elif func == 'MAMA':
-                vars['MAMA'], vars['FAMA'] = getattr(ta, 'MAMA')(vars['close'], **params)
+                vars['MAMA'], vars['FAMA'] = ta.MAMA(vars['close'], **params)
             # elif func == 'MAVP':
             #     vars['mavp_real'] = getattr(ta, 'MAVP')(vars['close'], **params)
             elif func == 'MIDPOINT':
-                vars['MIDPOINT'] = getattr(ta, 'MIDPOINT')(vars['close'], **params)
+                vars['MIDPOINT'] = ta.MIDPOINT(vars['close'], **params)
             elif func == 'MIDPRICE':
-                vars['MIDPRICE'] = getattr(ta, 'MIDPRICE')(vars['high'], vars['low'], **params)
+                vars['MIDPRICE'] = ta.MIDPRICE(vars['high'], vars['low'], **params)
             elif func == 'SAR':
-                vars['SAR'] = getattr(ta, 'SAR')(vars['high'], vars['low'], **params)
+                vars['SAR'] = ta.SAR(vars['high'], vars['low'], **params)
             elif func == 'SAREXT':
-                vars['SAREXT'] = getattr(ta, 'SAREXT')(vars['high'], vars['low'], **params)
+                vars['SAREXT'] = ta.SAREXT(vars['high'], vars['low'], **params)
             elif func == 'SMA':
-                vars['SMA'] = getattr(ta, 'SMA')(vars['close'], **params)
+                vars['SMA'] = ta.SMA(vars['close'], **params)
             elif func == 'T3':
-                vars['T3'] = getattr(ta, 'T3')(vars['close'], **params)
+                vars['T3'] = ta.T3(vars['close'], **params)
             elif func == 'TEMA':
-                vars['TEMA'] = getattr(ta, 'TEMA')(vars['close'], **params)
+                vars['TEMA'] = ta.TEMA(vars['close'], **params)
             elif func == 'TRIMA':
-                 vars['TRIMA'] = getattr(ta, 'TRIMA')(vars['close'], **params)
+                 vars['TRIMA'] = ta.TRIMA(vars['close'], **params)
             elif func == 'WMA':
-                vars['WMA'] = getattr(ta, 'WMA')(vars['close'], **params)
+                vars['WMA'] = ta.WMA(vars['close'], **params)
             #  ta-lib momentum indicators 
             elif func == 'ADX': 
-                vars['ADX'] = getattr(ta, 'ADX')(vars['high'], vars['low'], vars['close'], **params)
+                vars['ADX'] = ta.ADX(vars['high'], vars['low'], vars['close'], **params)
             elif func == 'ADXR':
-                vars['ADXR'] = getattr(ta, 'ADXR')(vars['high'], vars['low'], vars['close'], **params)
+                vars['ADXR'] = ta.ADXR(vars['high'], vars['low'], vars['close'], **params)
             elif func == 'APO':
                 vars['APO'] = getattr(ta, 'APO')(vars['close'], **params)
             elif func == 'AROON':
