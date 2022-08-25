@@ -9,3 +9,4 @@
 ## TODO:
 
 * [ ] tensorflow LSTM predicts price percent change to various points in the future
+* [ ] tensorflow reinforcement learning strategies

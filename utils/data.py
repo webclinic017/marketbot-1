@@ -10,7 +10,7 @@ from tqdm import tqdm
 import logging
 import os
 
-def download_data(client : Union[TDA_Client, CB_Client], log=False, **kwargs):
+def download_data(client : Union[TDA_Client, CB_Client, ], log=False, **kwargs):
     if isinstance(client, TDA_Client):
         all_frequencies = {
             'ONE_MIN': client.PriceHistory.Frequency.EVERY_MINUTE,
@@ -353,3 +353,4 @@ def extract_features(features : dict, json_string : str, api : str, normalize=Tr
             return df
     else:
         return df
+

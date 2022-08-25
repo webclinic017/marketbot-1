@@ -8,6 +8,9 @@ configparser
 backtrader
 quantlib
 talib
+sklearn
 xgboost
 pykrakenapi
 krakenex
+pyfolio
+alpha_vantage
