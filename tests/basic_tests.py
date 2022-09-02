@@ -1,38 +1,42 @@
 from utils.data import get_data
 from api.creds import client_connect
 from tda.client import Client
-import json
-from tda import client
-import pandas as pd
-from talib import get_functions
-import numpy as np
-import logging
-from typing import Union
 from models.tf.dataset import StockDataGenerator
 from models.tf.models import LongShortTermMemory
+from time import sleep
 import unittest
+import sys
+import argparse
 
-''' Test Data Download and Feature Extraction '''
 class TestBasics(unittest.TestCase):
-
+    ''' Tests for data downloading, feature creation, and basic training pipelines '''
+    @unittest.skip('in order to minimize API calls')
     def test_data_extraction_tda(self):
-        print('TEST 1: Data Download and Feature Extraction')
+        if DEBUG: 
+            print('TEST 1: Data Download and Feature Extraction')
+            sleep(1.0)
         tda_client = client_connect('TDA', 'private/creds.ini')
         self.assertEqual(type(tda_client), Client)
-        print('[ TD Ameritrade API, Symbol: BLK ]')
+        if DEBUG: print('[ TD Ameritrade API, Symbol: BLK ]')
         data = get_data(tda_client, symbol='BLK', period='TEN_YEAR', period_type='YEAR', frequency='DAILY', frequency_type='DAILY',
                         features= { 
+                            'EMA': {}
+                        }, api='TDA', save=False)
+        if DEBUG: print(data)
     
-                        }, api='TDA', save=True)
-        print(data)
-    
-    def test_model_compile_train(self):
-        dataset = StockDataGenerator('NDAQ', 'data/TDA/NDAQ/NDAQ_2012-08-27_2022-08-26.csv')
-        X_train, y_train, X_test, y_test = dataset.split_data()
+    def test_dataset_model_compile_train(self):
+        if DEBUG:
+            print('\nTEST 2: Dataset Processing and Model Compiling/Training')
+            sleep(1.0)
+        data = StockDataGenerator('BLK', 'data/TDA/BLK/BLK_2012-09-06 05:00:00_2022-09-06 05:00:00.csv')
         lstm = LongShortTermMemory()
-        lstm.create_model(X_train)
-        lstm.train_model(X_train, y_train)
+        lstm.create_model(data.X_train, verbose=DEBUG)
+        lstm.train_model(data.X_train, data.y_train, verbose=DEBUG)
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--debug', default='False')
+    args = parser.parse_args()
+    sys.argv[1:] = args
     unittest.main()

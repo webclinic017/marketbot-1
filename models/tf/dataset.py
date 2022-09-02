@@ -1,11 +1,10 @@
-from dataclasses import dataclass
-from locale import normalize
 import tensorflow as tf
 import pandas as pd
 import numpy as np
 from datetime import datetime as dt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import scale
+import matplotlib.pyplot as plt
 
 class StockDataGenerator(object):
     def __init__(self, symbol : str, data_path : str, target='close',
@@ -19,6 +18,7 @@ class StockDataGenerator(object):
         self.data = pd.read_csv(data_path, index_col='datetime')
         self.num_features = len(self.data.columns) - 1 
         self.target = target
+        self._process_dataset()
 
     def info(self):
         return "StockDataSet [%s] train: %d test: %d" % (
@@ -27,26 +27,27 @@ class StockDataGenerator(object):
 
     def get_num_features(self): return self.num_features
 
-    def _prepare_data(self, lookback=2):
+    def _process_dataset(self, lookback=2, normalization=True, test_percent=0.25, verbose=False):
+        if verbose: print('Normalizing data...')
         self.data['percentChange'] = self.data['close'] / self.data['open'] - 1
-        # self.data.index = [ dt.strptime(date, '%Y-%m-%d %I:%M:%S') for date in self.data.index.values]
+        if verbose: print('Generating lookback features...')        
         for i in range(1, lookback + 1):
             self.data[f'percentChange-{i}'] = self.data['percentChange'].shift(-lookback)
+        if verbose: print('Scaling data...')
         self.data = pd.DataFrame(scale(X=self.data), index=self.data.index, columns=self.data.columns)
-    
-    def split_data(self, test_percent=0.25):
-        self._prepare_data()
         X = self.data.loc[:, self.data.columns != self.target]
         y = self.data.loc[:, self.data.columns == self.target]
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_percent, random_state=42)
-        X_train = X_train.to_numpy()
-        y_train = y_train.to_numpy()
-        X_test = X_test.to_numpy()
-        y_test = y_test.to_numpy()
+        self.X_train = X_train.to_numpy()
+        self.y_train = y_train.to_numpy()
+        self.X_test = X_test.to_numpy()
+        self.y_test = y_test.to_numpy()
         return X_train, y_train, X_test, y_test
     
-    def generate_windows(self):
+    def generate_window():
+        # TODO:
         pass
 
-        # if self.normalized:
-        #     self.data['%B'] = (self.data['close'] - self.data['LOWER_BBAND']) / (self.data['UPPER_BBAND'] - self.data['LOWER_BBAND'])
+    def plot_feature(features: list):
+        # TODO:
+        pass

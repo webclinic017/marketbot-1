@@ -8,8 +8,7 @@ backtrader
 ta-lib
 sklearn
 xgboost
-pykrakenapi
-krakenex
 pyfolio
 alpha_vantage
 tqdm
+argparse

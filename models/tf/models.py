@@ -1,12 +1,12 @@
 from unicodedata import bidirectional
 import tensorflow as tf
-from tensorflow.keras.layers import LSTM, Dropout, Dense, Bidirectional
+from tensorflow.keras.layers import LSTM, Dropout, Dense
 from tensorflow.keras.metrics import RootMeanSquaredError 
-from tensorflow.keras.optimizers import RMSprop
+from tensorflow.keras.optimizers import Adam
 from tensorflow.keras import Sequential
 
-class LongShortTermMemory:
-    def __init__(self, target='close'):
+class LongShortTermMemory(tf.Module):
+    def __init__(self, loss='rmse', opt='Adam', target='close'):
         self.target = target
         self.model = None
 
@@ -22,7 +22,7 @@ class LongShortTermMemory:
                     tf.keras.metrics.MeanAbsoluteError(name='MAE') ]
         return metrics
 
-    def create_model(self, X_train, prediction_range=100) -> tf.keras.Model:
+    def create_model(self, X_train, prediction_range=100, verbose=False) -> tf.keras.Model:
         model = Sequential()
         
         # 1st LSTM layer
@@ -60,32 +60,21 @@ class LongShortTermMemory:
         # Dense layer that specifies an output of one unit
         model.add(Dense(units=1))
 
-        model.summary()
+        if verbose: model.summary()
         self.model = model
 
-    def train_model(self, X_train, y_train):
+    def train_model(self, X_train, y_train, epochs=10, batches=32, verbose=False):
         if self.model is None:
             raise TypeError('Model has not been created yet! (received None type as input to trainer)')
-        self.model.compile(RMSprop(name='rmsprop_loss'), RootMeanSquaredError(), metrics=self.get_metrics())
-        history = self.model.fit(X_train, y_train, batch_size=32, epochs=25, verbose=1)
+        loss = RootMeanSquaredError()
+        opt = Adam()
+        self.model.compile(opt, loss, metrics=self.get_metrics())
+        history = self.model.fit(X_train, y_train, batch_size=32, epochs=25, verbose=1 if verbose else 0)
 
-    def test_model():
+    def test_model(self):
+        # TODO:
         pass
 
-class BILSTM:
-    def get_metrics(self):
-        metrics = [ tf.keras.metrics.MeanSquaredError(name='MSE'), 
-                    tf.keras.metrics.MeanAbsoluteError(name='MAE') ]
-        return metrics
-
-    def get_callbacks():
-        callbacks = [
-            tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3, mode='min', verbose=1), 
-            tf.keras.callbacks.ModelCheckpoint(filepath='model.{epoch:02d}-{val_loss:.2f}.h5')
-        ]
-        return callbacks
-
-    def create_model(self, X_train, prediction_range=100):
-        model = Sequential()
-
-        model.add(Bidirectional(LSTM(units=prediction_range, return_sequences=True, input_shape=(X_train.shape[1], 1))))
+    def plot_train_metrics(self):
+        # TODO:
+        pass
