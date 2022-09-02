@@ -1,5 +1,7 @@
 from tda.client.synchronous import Client as TDA_Client
 from coinbase.wallet.client import Client as CB_Client
+import alpha_vantage as av
+from alpha_vantage.timeseries import TimeSeries
 import pandas as pd
 from pandas import DataFrame
 import json
@@ -13,7 +15,7 @@ from tqdm import tqdm
 import logging
 import os
 
-def get_data(client : Union[TDA_Client, CB_Client ], features : dict, api : str, normalize=True, save=False, log=False, **kwargs):
+def get_data(client : Union[TDA_Client, CB_Client, str ], features : dict, api : str, normalize=True, save=False, log=False, **kwargs):
     '''
         Args:
             client
@@ -365,4 +367,3 @@ def get_data(client : Union[TDA_Client, CB_Client ], features : dict, api : str,
         return df
     # TODO: Coinbase API Compatibility
     # TODO: Coin Market Data API Compatibility
-

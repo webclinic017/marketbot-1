@@ -1,4 +1,5 @@
 import logging
+from wsgiref.validate import ErrorWrapper
 from tda import auth
 from tda.auth import Client as TDA_Client
 from coinbase.wallet.client import Client as CB_Client
@@ -13,7 +14,7 @@ def client_connect(api: str, cfg: str, log=False) -> Union[CB_Client, TDA_Client
         authenticates the connection with the given keys accordingly. 
 
         Args:
-            api (str) : the api to connect to (e.g. 'TDA' or 'CB')
+            api (str) : the api to connect to (e.g. 'TDA', 'CB', or 'AV' )
             cfg (str) : path to the config file with api keys 
             log (bool) : enable/disable logging for debugging authentication
         

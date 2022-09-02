@@ -2,15 +2,14 @@ pandas
 tensorflow
 tda-api
 coinbase
-logging
 pytest
 configparser
 backtrader
-quantlib
-talib
+ta-lib
 sklearn
 xgboost
 pykrakenapi
 krakenex
 pyfolio
 alpha_vantage
+tqdm
