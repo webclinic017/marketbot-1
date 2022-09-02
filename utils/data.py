@@ -4,6 +4,8 @@ import pandas as pd
 from pandas import DataFrame
 import json
 import talib as ta
+import datetime as dt
+from datetime import datetime, timedelta
 import inspect
 import numpy as np
 from typing import Union
@@ -11,7 +13,16 @@ from tqdm import tqdm
 import logging
 import os
 
-def download_data(client : Union[TDA_Client, CB_Client, ], log=False, **kwargs):
+def get_data(client : Union[TDA_Client, CB_Client ], features : dict, api : str, normalize=True, save=False, log=False, **kwargs):
+    '''
+        Args:
+            client
+            features (dict) :
+            api (str) :
+            normalize (bool) :
+        Returns:
+        Raises:
+    '''
     if isinstance(client, TDA_Client):
         all_frequencies = {
             'ONE_MIN': client.PriceHistory.Frequency.EVERY_MINUTE,
@@ -63,13 +74,9 @@ def download_data(client : Union[TDA_Client, CB_Client, ], log=False, **kwargs):
         }
         payload = { key: val for key, val in params.items() if val != None } 
         data = json.dumps(client.get_price_history(**payload).json(), indent=4)
-        return data
-    # TODO: Coinbase API Compatibility
-    # TODO: Coin Market Data API Compatibility
 
-
-def extract_features(features : dict, data : str, api : str, normalize=True, save=False) -> DataFrame:
-    data = json.loads(data)
+    '''Extract Features'''
+    data = json.loads(data)    
     symbol = data['symbol']
     
     vars = {
@@ -80,22 +87,17 @@ def extract_features(features : dict, data : str, api : str, normalize=True, sav
         'volume': np.array([ candle['volume'] for candle in data['candles'] ]),
         'datetime': np.array([ pd.to_datetime(candle['datetime'], unit='ms') for candle in data['candles'] ])
     }
-
-    vars['volume'] = vars['volume'].astype(np.float)
-    days_to_fix = 0
-    for func, params in features.items():
-        if 'timeperiod' in params.keys():
-            days_to_fix = max(days_to_fix, params['timeperiod'])
-        else:
-            days_to_fix = max(inspect.signature(getattr(ta, func)).parameters['timeperiod'])
     
+    start_date = vars['datetime'][0]
+    end_date = vars['datetime'][-1]
+    vars['volume'] = vars['volume'].astype(float)
 
     # use ta-lib to calculate features given as input 
-    for func, params in tqdm(features.items()):
+    for func, params in features.items():
         if func in ta.get_functions():
             # ta-lib overlap studies
             if func == 'BBANDS':
-                upperband, middleband, lowerband = getattr(ta, 'BBANDS')(vars['close'], **params)
+                upperband, middleband, lowerband = ta.BBANDS(vars['close'], **params)
                 vars['UPPER_BBAND'] = upperband
                 vars['MIDDLE_BBAND'] = middleband
                 vars['LOWER_BBAND'] = lowerband
@@ -104,11 +106,11 @@ def extract_features(features : dict, data : str, api : str, normalize=True, sav
             elif func == 'EMA':
                 vars['EMA'] = ta.EMA(vars['close'], **params)
             elif func == 'HT_TRENDLINE':
-                vars['HT_TRENDLINE'] = getattr(ta, 'HT_TRENDLINE')(vars['close'], **params)
+                vars['HT_TRENDLINE'] = ta.HT_TRENDLINE(vars['close'], **params)
             elif func == 'KAMA':
-                vars['KAMA'] = getattr(ta, 'KAMA')(vars['close'], **params)
+                vars['KAMA'] = ta.KAMA(vars['close'], **params)
             elif func == 'MA':
-                vars['MA'] = getattr(ta, 'MA')(vars['close'], **params)
+                vars['MA'] = ta.MA(vars['close'], **params)
             elif func == 'MAMA':
                 vars['MAMA'], vars['FAMA'] = ta.MAMA(vars['close'], **params)
             # elif func == 'MAVP':
@@ -137,7 +139,7 @@ def extract_features(features : dict, data : str, api : str, normalize=True, sav
             elif func == 'ADXR':
                 vars['ADXR'] = ta.ADXR(vars['high'], vars['low'], vars['close'], **params)
             elif func == 'APO':
-                vars['APO'] = getattr(ta, 'APO')(vars['close'], **params)
+                vars['APO'] = ta.APO(vars['close'], **params)
             elif func == 'AROON':
                 vars['AROONDOWN'], vars['AROONUP'] = getattr(ta, 'AROON')(vars['high'], vars['low'], **params)
             elif func == 'AROONOSC':
@@ -345,11 +347,12 @@ def extract_features(features : dict, data : str, api : str, normalize=True, sav
                 vars['CDLXSIDEGAP3METHODS'] = ta.CDLXSIDEGAP3METHODS(vars['open'], vars['high'], vars['low'], vars['close'])
 
     df = DataFrame.from_dict(vars)
+    df = df.dropna()
     df.index = df['datetime']
     df.drop('datetime', axis='columns', inplace=True)
-    start_date = str(df.index[0])[0:10]
-    end_date = str(df.index[-1])[0:10]
-
+    start_date = str(start_date)
+    end_date = str(end_date)
+    
     if save:
         if os.path.exists(f'data/{api}/{symbol}/'):
             DataFrame.to_csv(df, f'data/{api}/{symbol}/{symbol}_{start_date}_{end_date}.csv')
@@ -360,4 +363,6 @@ def extract_features(features : dict, data : str, api : str, normalize=True, sav
             return df
     else:
         return df
+    # TODO: Coinbase API Compatibility
+    # TODO: Coin Market Data API Compatibility
 
