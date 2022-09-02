@@ -22,7 +22,7 @@ class LongShortTermMemory(tf.Module):
                     tf.keras.metrics.MeanAbsoluteError(name='MAE') ]
         return metrics
 
-    def create_model(self, X_train, prediction_range=100, verbose=False) -> tf.keras.Model:
+    def create_model(self, X_train, prediction_range=100, verbose=0) -> tf.keras.Model:
         model = Sequential()
         
         # 1st LSTM layer
@@ -60,10 +60,10 @@ class LongShortTermMemory(tf.Module):
         # Dense layer that specifies an output of one unit
         model.add(Dense(units=1))
 
-        if verbose: model.summary()
+        if verbose > 1: model.summary()
         self.model = model
 
-    def train_model(self, X_train, y_train, epochs=10, batches=32, verbose=False):
+    def train_model(self, X_train, y_train, epochs=10, batches=32, verbose=0):
         if self.model is None:
             raise TypeError('Model has not been created yet! (received None type as input to trainer)')
         loss = RootMeanSquaredError()

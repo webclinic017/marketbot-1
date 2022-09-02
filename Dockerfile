@@ -1,10 +1,4 @@
 FROM python:3.9 as compiler
-# ENV PYTHONUNBUFFERED 1
-# ENV VIRTUAL_ENV=/opt/venv
-# RUN python -m venv $VIRTUAL_ENV
-# ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-
-# download required backend
 RUN cd lib \
 && wget "https://sourceforge.net/projects/ta-lib/files/ta-lib/0.4.0/ta-lib-0.4.0-src.tar.gz" \
 && tar -xvzf ta-lib-0.4.0-src.tar.gz ta-lib/ \

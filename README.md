@@ -1,5 +1,32 @@
 # MarketBot (WIP)
 
+## API CREDS
+
+In order for the package to work and connect to the APIs on
+your system, you must put add the file 'creds.ini' to the directory
+'/private/'. The final path of the file will look like '/private/creds.ini'. This file should be formatted as follows:
+```
+[TDA_AUTH]
+API_KEY = <Insert TD Ameritrade API key here>
+REDIRECT = <Insert redirect url here (for the corresponding TDA API key's application)
+TOKEN_PATH = <insert token file path here (probably root of project)>
+ACCOUNT_ID = <Insert TD Ameritrade account id here>
+
+[CB_AUTH]
+API_KEY = <Insert Coinbase API key here>
+API_SECRET = <Insert Coinbase API secret key here>
+```
+
+## HOW TO INSTALL WITH DOCKER
+
+In order to install and run this project to a container follow these steps:
+
+1. Using a terminal, clone this repository to a directory on your system of choice: \
+```git clone https://github.com/jacksteussie/market-bot.git```
+
+2. In the cloned directory build the docker image: \
+```docker build -t market-bot -f Dockerfile .```
+
 ## API SUPPORT
 
 * [ ] Coinbase

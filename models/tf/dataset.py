@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 class StockDataGenerator(object):
     def __init__(self, symbol : str, data_path : str, target='close',
                  num_steps=30, test_ratio=0.15, normalized=True,
-                 close_price_only=True) -> tf.data.Dataset:
+                 close_price_only=True, verbose=0) -> tf.data.Dataset:
         self.symbol = symbol
         self.num_steps = num_steps
         self.test_ratio = test_ratio
@@ -19,6 +19,7 @@ class StockDataGenerator(object):
         self.num_features = len(self.data.columns) - 1 
         self.target = target
         self._process_dataset()
+        self.verbose = verbose
 
     def info(self):
         return "StockDataSet [%s] train: %d test: %d" % (
@@ -27,13 +28,13 @@ class StockDataGenerator(object):
 
     def get_num_features(self): return self.num_features
 
-    def _process_dataset(self, lookback=2, normalization=True, test_percent=0.25, verbose=False):
-        if verbose: print('Normalizing data...')
+    def _process_dataset(self, lookback=2, normalization=True, test_percent=0.25, verbose=0):
+        if verbose >= 1: print('Normalizing data...')
         self.data['percentChange'] = self.data['close'] / self.data['open'] - 1
-        if verbose: print('Generating lookback features...')        
+        if verbose >= 1: print('Generating lookback features...')        
         for i in range(1, lookback + 1):
             self.data[f'percentChange-{i}'] = self.data['percentChange'].shift(-lookback)
-        if verbose: print('Scaling data...')
+        if verbose >= 1: print('Scaling data...')
         self.data = pd.DataFrame(scale(X=self.data), index=self.data.index, columns=self.data.columns)
         X = self.data.loc[:, self.data.columns != self.target]
         y = self.data.loc[:, self.data.columns == self.target]
@@ -48,6 +49,6 @@ class StockDataGenerator(object):
         # TODO:
         pass
 
-    def plot_feature(features: list):
+    def plot_features(features: list):
         # TODO:
         pass
