@@ -5,20 +5,31 @@ from datetime import datetime as dt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import scale
 import matplotlib.pyplot as plt
+from api.creds import client_connect
+from utils.data import get_data
+import os
 
 class StockDataGenerator(object):
-    def __init__(self, symbol : str, data_path : str, target='close',
+    def __init__(self, symbol=None, api=None, data_path='\n', target='close',
                  num_steps=30, test_ratio=0.15, normalized=True,
-                 close_price_only=True, verbose=0) -> tf.data.Dataset:
+                 close_price_only=True, verbose=0):
         self.symbol = symbol
         self.num_steps = num_steps
         self.test_ratio = test_ratio
         self.close_price_only = close_price_only
         self.normalized = normalized
-        self.data = pd.read_csv(data_path, index_col='datetime')
+
+        if symbol is not None:
+            if api == 'TDA':
+                self.client = client_connect(api, 'private/creds.ini')
+            self.data = get_data(self.client, symbol)
+        else:
+            self.data = pd.read_csv(data_path, index_col='datetime')
+            self.symbol = os.path.basename(data_path)
+
         self.num_features = len(self.data.columns) - 1 
         self.target = target
-        self._process_dataset()
+        self.process_dataset()
         self.verbose = verbose
 
     def info(self):
@@ -28,7 +39,7 @@ class StockDataGenerator(object):
 
     def get_num_features(self): return self.num_features
 
-    def _process_dataset(self, lookback=2, normalization=True, test_percent=0.25, verbose=0):
+    def process_dataset(self, lookback=2, normalization=True, test_percent=0.25, verbose=0):
         if verbose >= 1: print('Normalizing data...')
         self.data['percentChange'] = self.data['close'] / self.data['open'] - 1
         if verbose >= 1: print('Generating lookback features...')        

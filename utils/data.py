@@ -358,11 +358,11 @@ def get_data(client : Union[TDA_Client, CB_Client, str ], features : dict, api :
     if save:
         if os.path.exists(f'data/{api}/{symbol}/'):
             DataFrame.to_csv(df, f'data/{api}/{symbol}/{symbol}_{start_date}_{end_date}.csv')
-            return df
+            return df, f'data/{api}/{symbol}/{symbol}_{start_date}_{end_date}.csv'
         else:
             os.makedirs(f'data/{api}/{symbol}/')
             DataFrame.to_csv(df, f'data/{api}/{symbol}/{symbol}_{start_date}_{end_date}.csv')
-            return df
+            return df, f'data/{api}/{symbol}/{symbol}_{start_date}_{end_date}.csv'
     else:
         return df
     # TODO: Coinbase API Compatibility

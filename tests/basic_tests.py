@@ -10,7 +10,7 @@ import argparse
 
 class TestBasics(unittest.TestCase):
     ''' Tests for data downloading, feature creation, and basic training pipelines '''
-    @unittest.skip('in order to minimize API calls')
+    # @unittest.skip('in order to minimize API calls')
     def test_data_extraction_tda(self):
         tda_client = client_connect('TDA', 'private/creds.ini')
         self.assertEqual(type(tda_client), Client)
