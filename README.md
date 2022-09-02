@@ -15,6 +15,9 @@ ACCOUNT_ID = <Insert TD Ameritrade account id here>
 [CB_AUTH]
 API_KEY = <Insert Coinbase API key here>
 API_SECRET = <Insert Coinbase API secret key here>
+
+[POLY_AUTH]
+API_KEY = <Insert polygon.io API key here>
 ```
 
 ## HOW TO INSTALL WITH DOCKER
@@ -26,6 +29,8 @@ In order to install and run this project to a container follow these steps:
 
 2. In the cloned directory build the docker image: \
 ```docker build -t market-bot -f Dockerfile .```
+
+3. Do the same thing with the API credentials and ```creds.ini``` as described above but in the docker container running the built image. 
 
 ## API SUPPORT
 

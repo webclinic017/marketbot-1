@@ -23,7 +23,14 @@ class TestBasics(unittest.TestCase):
     
     def test_dataset_model_compile_train(self):
         print('\n')
-        data = StockDataGenerator('BLK', 'data/TDA/BLK/BLK_2012-09-06 05:00:00_2022-09-06 05:00:00.csv')
+        data = StockDataGenerator(
+            'BLK', 'TDA', 
+            period='TEN_YEAR', period_type='YEAR', 
+            frequency='DAILY', frequency_type='DAILY',
+            features = {
+                'EMA': {}
+            }, save=True
+        )
         lstm = LongShortTermMemory()
         lstm.create_model(data.X_train, verbose=2)
         lstm.train_model(data.X_train, data.y_train, verbose=2)

@@ -1,3 +1,4 @@
+from typing import Any
 import tensorflow as tf
 import pandas as pd
 import numpy as np
@@ -10,19 +11,39 @@ from utils.data import get_data
 import os
 
 class StockDataGenerator(object):
-    def __init__(self, symbol=None, api=None, data_path='\n', target='close',
+    def __init__(self, symbol=None, api='', data_path='\n', features={}, target='close',
                  num_steps=30, test_ratio=0.15, normalized=True,
-                 close_price_only=True, verbose=0):
+                 close_price_only=True, verbose=0, period: Any=None, period_type: Any=None, 
+                 frequency: Any=None, frequency_type: Any=None, save=False):
         self.symbol = symbol
         self.num_steps = num_steps
         self.test_ratio = test_ratio
         self.close_price_only = close_price_only
         self.normalized = normalized
+        self.client = None
+        self.features = features
+        self.api = api
+        self.period = period
+        self.period_type = period_type
+        self.frequency = frequency
+        self.frequency_type = frequency_type
+        self.save = save
 
-        if symbol is not None:
-            if api == 'TDA':
-                self.client = client_connect(api, 'private/creds.ini')
-            self.data = get_data(self.client, symbol)
+        if symbol != None:
+            if self.api == 'TDA':
+                self.client = client_connect(self.api, 'private/creds.ini')
+            if self.save == True:
+                self.data, self.data_path = get_data(
+                    client=self.client, api=self.api, features=self.features, symbol=self.symbol,
+                    save=self.save, period=self.period, period_type=self.period_type, frequency=self.frequency, 
+                    frequency_type=self.frequency_type, 
+                )
+            else:
+                self.data = get_data(
+                    client=self.client, api=self.api, features=self.features, symbol=self.symbol,
+                    save=self.save, period=self.period, period_type=self.period_type, frequency=self.frequency, 
+                    frequency_type=self.frequency_type
+                )
         else:
             self.data = pd.read_csv(data_path, index_col='datetime')
             self.symbol = os.path.basename(data_path)

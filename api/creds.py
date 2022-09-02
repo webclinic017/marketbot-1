@@ -5,16 +5,15 @@ from tda.auth import Client as TDA_Client
 from coinbase.wallet.client import Client as CB_Client
 from configparser import ConfigParser
 from typing import Union
-from pykrakenapi import KrakenAPI
-import krakenex
+from polygon import RESTClient as POLY_CLIENT
 
-def client_connect(api: str, cfg: str, log=False) -> Union[CB_Client, TDA_Client]:
+def client_connect(api: str, cfg: str, log=False) -> Union[CB_Client, TDA_Client, POLY_CLIENT]:
     '''
         Returns a client connection to the given api and 
         authenticates the connection with the given keys accordingly. 
 
         Args:
-            api (str) : the api to connect to (e.g. 'TDA', 'CB', or 'AV' )
+            api (str) : the api to connect to (e.g. 'TDA', 'CB', or 'POLY' )
             cfg (str) : path to the config file with api keys 
             log (bool) : enable/disable logging for debugging authentication
         
@@ -42,4 +41,8 @@ def client_connect(api: str, cfg: str, log=False) -> Union[CB_Client, TDA_Client
     elif api == 'CB':
         API_SECRET = config.get(f'{api}_AUTH', 'API_SECRET')
         client = CB_Client(API_KEY, API_SECRET)
+        return client
+    elif api == 'POLY':
+        API_KEY = config.get(f'{api}_AUTH', 'API_KEY')
+        client = POLY_CLIENT(API_KEY)
         return client

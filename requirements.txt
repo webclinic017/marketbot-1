@@ -12,3 +12,4 @@ pyfolio
 alpha_vantage
 tqdm
 argparse
+polygon-api-client

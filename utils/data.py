@@ -1,7 +1,5 @@
 from tda.client.synchronous import Client as TDA_Client
 from coinbase.wallet.client import Client as CB_Client
-import alpha_vantage as av
-from alpha_vantage.timeseries import TimeSeries
 import pandas as pd
 from pandas import DataFrame
 import json
@@ -15,7 +13,7 @@ from tqdm import tqdm
 import logging
 import os
 
-def get_data(client : Union[TDA_Client, CB_Client, str ], features : dict, api : str, normalize=True, save=False, log=False, **kwargs):
+def get_data(client : Union[TDA_Client, CB_Client, str ], features : dict, api : str, symbol: str, normalize=True, save=False, log=False, **kwargs):
     '''
         Args:
             client
@@ -67,7 +65,7 @@ def get_data(client : Union[TDA_Client, CB_Client, str ], features : dict, api :
             'YEAR_TO_DATE': client.PriceHistory.PeriodType.YEAR_TO_DATE
         }
         params = {
-            'symbol': kwargs['symbol'], 
+            'symbol': symbol, 
             'period_type': all_period_types[kwargs['period_type']], 
             'period': all_periods[kwargs['period']], 
             'frequency_type': all_frequency_types[kwargs['frequency_type']], 
