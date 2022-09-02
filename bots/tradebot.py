@@ -1,5 +1,6 @@
 import asyncio
 from bots.strategies import Strategy
+from backtesting import datafeed
 
 class TradeBot:
     def __init__(self, strategy, auto_update_model: bool):
@@ -27,3 +28,10 @@ class TradeBot:
             print('Toggling automated model training and updating ON')
             self.auto_update_model = True
             #TODO:
+class ArbitrageBot(TradeBot):
+    # TODO:
+    pass
+
+class SpeculationBot(TradeBot):
+    # TODO:
+    pass
