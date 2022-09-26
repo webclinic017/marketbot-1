@@ -37,8 +37,3 @@ In order to install and run this project to a container follow these steps:
 * [ ] Coinbase
 * [x] TD Ameritrade
 * [ ] polygon.io
-
-## TODO:
-
-* [ ] tensorflow LSTM predicts price percent change to various points in the future
-* [ ] tensorflow reinforcement learning strategies
