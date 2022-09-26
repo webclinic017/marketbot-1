@@ -1,4 +1,0 @@
-# TODO:
-
-* [ ] when inputting params for technical indicators, make it so that if a technical indicator is applied for a certain date range, the dates towards the beginning of the daterange of interest don't have N/A values for the indicators (this really only effects the technical indicators towards the beginning of the range). For examble, if we have the BBANDS for a 30 timestep range, right now, ta-lib will only calculate the BBANDS indicator at the 30th timestep, meaning that we will have N/A values for the first 29 timesteps and the 30th timestep will have an actual value for the BBANDS feature in our dataset.
-* [ ] fix above issue but for technical analysis function has a variation of the 'timestep' parameter
