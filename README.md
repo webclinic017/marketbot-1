@@ -1,4 +1,10 @@
-# MarketBot (WIP)
+# MarketBot
+
+## API SUPPORT
+
+* [ ] Coinbase
+* [x] TD Ameritrade
+* [ ] polygon.io
 
 ## API CREDS
 
@@ -31,9 +37,3 @@ In order to install and run this project to a container follow these steps:
 ```docker build -t market-bot -f Dockerfile .```
 
 3. Do the same thing with the API credentials and ```creds.ini``` as described above but in the docker container running the built image. 
-
-## API SUPPORT
-
-* [ ] Coinbase
-* [x] TD Ameritrade
-* [ ] polygon.io
