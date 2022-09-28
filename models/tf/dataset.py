@@ -50,7 +50,7 @@ class StockDataGenerator(object):
 
         self.num_features = len(self.data.columns) - 1 
         self.target = target
-        self.process_dataset()
+        self._process_dataset()
         self.verbose = verbose
 
     def info(self):
@@ -60,7 +60,7 @@ class StockDataGenerator(object):
 
     def get_num_features(self): return self.num_features
 
-    def process_dataset(self, lookback=2, normalization=True, test_percent=0.25, verbose=0):
+    def _process_dataset(self, lookback=2, normalization=True, test_percent=0.25, verbose=0):
         if verbose >= 1: print('Normalizing data...')
         self.data['percentChange'] = self.data['close'] / self.data['open'] - 1
         if verbose >= 1: print('Generating lookback features...')        
@@ -77,7 +77,7 @@ class StockDataGenerator(object):
         self.y_test = y_test.to_numpy()
         return X_train, y_train, X_test, y_test
     
-    def generate_window():
+    def _generate_window():
         # TODO:
         pass
 

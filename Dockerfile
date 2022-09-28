@@ -1,13 +1,23 @@
-FROM python:3.9 as compiler
-RUN cd lib \
-&& wget "https://sourceforge.net/projects/ta-lib/files/ta-lib/0.4.0/ta-lib-0.4.0-src.tar.gz" \
+FROM continuumio/miniconda3 as builder 
+SHELL ["/bin/bash", "-c"]
+RUN apt-get update && apt-get -y upgrade \
+&& apt-get install -y --no-install-recommends \
+    git \
+    wget \
+    g++ \
+    gcc \
+    ca-certificates \
+    make \
+    && rm -rf /var/lib/apt/lists/*
+RUN cd root \
+&& wget --show-progress "https://sourceforge.net/projects/ta-lib/files/ta-lib/0.4.0/ta-lib-0.4.0-src.tar.gz" \
 && tar -xvzf ta-lib-0.4.0-src.tar.gz ta-lib/ \
 && rm ta-lib-0.4.0-src.tar.gz
-RUN cd /lib/ta-lib \
+RUN cd root/ta-lib \
 && ./configure --build=aarch64-unknown-linux-gnu \
 && make \
 && make install
-RUN pip install --upgrade pip
-COPY requirements.txt ./
-RUN pip install -r requirements.txt
-ADD . /marketbot/
+COPY dependencies.yml ./
+RUN conda env create -n marketbot -f dependencies.yml
+RUN conda init bash && exit
+ADD . /marketbot

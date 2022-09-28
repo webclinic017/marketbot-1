@@ -1,0 +1,20 @@
+name: marketbot-env
+dependencies:
+- pip
+- python>=3.8, <3.10
+- pandas
+- tensorflow
+- pytest
+- configparser
+- xgboost
+- tqdm
+- pip:
+  - scipy
+  - numpy
+  - pyfolio
+  - polygon-api-client
+  - backtrader
+  - sklearn
+  - ta-lib
+  - tda-api
+  - coinbase

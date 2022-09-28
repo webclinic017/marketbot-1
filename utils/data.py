@@ -1,19 +1,19 @@
 from tda.client.synchronous import Client as TDA_Client
 from coinbase.wallet.client import Client as CB_Client
+from polygon import RESTClient as POLY_CLIENT
 import pandas as pd
 from pandas import DataFrame
 import json
 import talib as ta
 import datetime as dt
 from datetime import datetime, timedelta
-import inspect
 import numpy as np
 from typing import Union
 from tqdm import tqdm
 import logging
 import os
 
-def get_data(client : Union[TDA_Client, CB_Client, str ], features : dict, api : str, symbol: str, normalize=True, save=False, log=False, **kwargs):
+def get_data(client : Union[TDA_Client, CB_Client, POLY_CLIENT ], features : dict, api : str, symbol: str, normalize=True, save=False, log=False, **kwargs):
     '''
         Args:
             client
@@ -74,6 +74,9 @@ def get_data(client : Union[TDA_Client, CB_Client, str ], features : dict, api :
         }
         payload = { key: val for key, val in params.items() if val != None } 
         data = json.dumps(client.get_price_history(**payload).json(), indent=4)
+    elif isinstance(POLY_CLIENT):
+        # TODO:
+        pass
 
     '''Extract Features'''
     data = json.loads(data)    
