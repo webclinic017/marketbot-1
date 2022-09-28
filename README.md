@@ -36,4 +36,6 @@ In order to install and run this project to a container follow these steps:
 2. In the cloned directory build the docker image: \
 ```docker build -t market-bot -f Dockerfile .```
 
-3. Do the same thing with the API credentials and ```creds.ini``` as described above but in the docker container running the built image. 
+3. Do the same thing with the API credentials and ```creds.ini``` as described above but in the docker container running the built image.
+   
+4. Keep in mind, if developing/running tests in the container, you will have to initialize the conda environment inside bash. So when you get into the container and execute a bash shell, type ```conda activate marketbot```.

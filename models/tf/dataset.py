@@ -8,13 +8,14 @@ from sklearn.preprocessing import scale
 import matplotlib.pyplot as plt
 from api.creds import client_connect
 from utils.data import get_data
-import os
+import os 
 
 class StockDataGenerator(object):
-    def __init__(self, symbol=None, api='', data_path='\n', features={}, target='close',
-                 num_steps=30, test_ratio=0.15, normalized=True,
-                 close_price_only=True, verbose=0, period: Any=None, period_type: Any=None, 
-                 frequency: Any=None, frequency_type: Any=None, save=False):
+    def __init__(self, symbol=None, api='', data_path='\n', features={}, 
+                 target='close', num_steps=30, test_ratio=0.15, normalized=True,
+                 close_price_only=True, verbose=0, period: Any=None, 
+                 period_type: Any=None, frequency: Any=None, frequency_type: Any=None, 
+                 save=False):
         self.symbol = symbol
         self.num_steps = num_steps
         self.test_ratio = test_ratio
@@ -29,7 +30,7 @@ class StockDataGenerator(object):
         self.frequency_type = frequency_type
         self.save = save
 
-        if symbol != None:
+        if api != '':
             if self.api == 'TDA':
                 self.client = client_connect(self.api, 'private/creds.ini')
             if self.save == True:

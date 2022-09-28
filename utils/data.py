@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 import numpy as np
 from typing import Union
 from tqdm import tqdm
-import logging
+import multiprocessing as mp
 import os
 
 def get_data(client : Union[TDA_Client, CB_Client, POLY_CLIENT ], features : dict, api : str, symbol: str, normalize=True, save=False, log=False, **kwargs):
@@ -350,7 +350,8 @@ def get_data(client : Union[TDA_Client, CB_Client, POLY_CLIENT ], features : dic
                 vars['CDLXSIDEGAP3METHODS'] = ta.CDLXSIDEGAP3METHODS(vars['open'], vars['high'], vars['low'], vars['close'])
 
     df = DataFrame.from_dict(vars)
-    df = df.dropna()
+    df = df.dropna()            # this often drops some rows since the time range given to the technical indicators go past the data.
+                                # you still get most of the data you ask for for the most part, but it still needs to be fixed
     df.index = df['datetime']
     df.drop('datetime', axis='columns', inplace=True)
     start_date = str(start_date)
@@ -366,5 +367,4 @@ def get_data(client : Union[TDA_Client, CB_Client, POLY_CLIENT ], features : dic
             return df, f'data/{api}/{symbol}/{symbol}_{start_date}_{end_date}.csv'
     else:
         return df
-    # TODO: Coinbase API Compatibility
-    # TODO: Coin Market Data API Compatibility
+    # TODO: polygon.io API compatbility

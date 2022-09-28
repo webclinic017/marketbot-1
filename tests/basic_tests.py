@@ -3,10 +3,7 @@ from api.creds import client_connect
 from tda.client import Client
 from models.tf.dataset import StockDataGenerator
 from models.tf.models import LongShortTermMemory
-from time import sleep
 import unittest
-import sys
-import argparse
 
 class TestBasics(unittest.TestCase):
     ''' Tests for data downloading, feature creation, and basic training pipelines '''
@@ -17,12 +14,11 @@ class TestBasics(unittest.TestCase):
         print('\n[ TD Ameritrade API, Symbol: BLK ]')
         data = get_data(tda_client, symbol='BLK', period='TEN_YEAR', period_type='YEAR', frequency='DAILY', frequency_type='DAILY',
                         features= { 
-                            'EMA': {}
+                            'EMA': {}, 'BBANDS': {}
                         }, api='TDA', save=False)
         if True: print(data)
-    
-    def test_dataset_model_compile_train(self):
-        print('\n')
+
+    def test_dataset(self):
         data = StockDataGenerator(
             'BLK', 'TDA', 
             period='TEN_YEAR', period_type='YEAR', 
@@ -30,6 +26,13 @@ class TestBasics(unittest.TestCase):
             features = {
                 'EMA': {}
             }, save=True
+        )
+        self.assertEqual(type(data), StockDataGenerator)
+    
+    def test_dataset_model_compile_train(self):
+        print('\n')
+        data = StockDataGenerator(
+            'BLK', data_path='/Users/jacksteussie/Desktop/marketbot/data/TDA/BLK/BLK_2012-09-06 05:00:00_2022-09-06 05:00:00.csv'
         )
         lstm = LongShortTermMemory()
         lstm.create_model(data.X_train, verbose=2)
