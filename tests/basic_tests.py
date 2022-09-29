@@ -1,6 +1,7 @@
 from utils.data import get_data
 from api.creds import client_connect
 from tda.client import Client
+import tensorflow as tf
 from models.tf.dataset import StockDataGenerator
 from models.tf.models import LongShortTermMemory
 import unittest
@@ -11,17 +12,17 @@ import os
 
 class TestBasics(unittest.TestCase):
     ''' Basic tests for various smaller components of the software '''
-    @unittest.skip('in order to minimize API calls')
+    # @unittest.skip('in order to minimize API calls')
     def testGetData(self):
         tda_client = client_connect('TDA', 'private/creds.ini')
         self.assertEqual(type(tda_client), Client)
         if verbose > 0: print('\n[ TD Ameritrade API, Symbol: BLK ]')
-        data = get_data(tda_client, symbol='BLK', 
+        data = get_data(tda_client, symbol='NVDA', 
                         period='TEN_YEAR', period_type='YEAR', 
                         frequency='DAILY', frequency_type='DAILY',
                         features= { 
-                            'EMA': {}, 'BBANDS': {}
-                        }, api='TDA', save=False)
+                            'EMA': {}, '%B': {}, 'RSI': {}, 'CCI': {}, 'ADX': {}
+                        }, api='TDA', save=True, save_path='data/TDA/example.csv')
         if verbose > 0: print(data)
         tda_client.session.close()
 
@@ -34,8 +35,8 @@ class TestPipeline(unittest.TestCase):
             period='TEN_YEAR', period_type='YEAR', 
             frequency='DAILY', frequency_type='DAILY',
             features = {
-                'EMA': {}, '%B': {}, 'RSI': {}
-            }, save=True, verbose=verbose
+                'EMA': {}, '%B': {}, 'RSI': {}, 'CCI': {}
+            }, save=False, verbose=verbose
         )
         data.client.session.close()
         if verbose > 0: print('\n', data.data)
@@ -49,8 +50,9 @@ class TestPipeline(unittest.TestCase):
             data_path='data/TDA/example.csv',
             verbose=verbose, target='close'
         )
+        print(data.data)
         lstm = LongShortTermMemory()
-        lstm.compile_model(data.X_train, verbose=verbose)
+        lstm.compile_model(data.X_train, optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),verbose=verbose)
         lstm.train_model(data.X_train, data.y_train, epochs=50, verbose=1)
 
 if __name__ == '__main__':

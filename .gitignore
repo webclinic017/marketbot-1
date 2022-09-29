@@ -5,6 +5,7 @@ __pycache__/
 *.ipynb
 TODO.md
 models/tf/checkpoints/*
+*.png
 
 # C extensions
 *.so

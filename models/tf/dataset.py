@@ -30,14 +30,14 @@ class StockDataGenerator(object):
         self.frequency_type = frequency_type
         self.save = save
 
-        if data_path == '':
+        if self.api != '':
             if self.api == 'TDA':
                 self.client = client_connect(self.api, 'private/creds.ini')
             if self.save == True:
                 self.data, self.data_path = get_data(
                     client=self.client, api=self.api, features=self.features, symbol=self.symbol,
                     save=self.save, period=self.period, period_type=self.period_type, frequency=self.frequency, 
-                    frequency_type=self.frequency_type, 
+                    frequency_type=self.frequency_type, save_path=data_path
                 )
             else:
                 self.data = get_data(
@@ -51,7 +51,7 @@ class StockDataGenerator(object):
 
         self.num_features = len(self.data.columns) - 1 
         self.target = target
-        self._process_dataset()
+        self._process_dataset(pc=False)
         self._train_test_split()
         self.verbose = verbose
 
@@ -62,16 +62,17 @@ class StockDataGenerator(object):
 
     def get_num_features(self): return self.num_features
 
-    def _process_dataset(self, lookback=0, normalization=True, verbose=0):
+    def _process_dataset(self, lookback=0, normalization=True, verbose=0, pc=True):
         if verbose >= 1: print('Normalizing data...')
-        self.data['percentChangeOC'] = self.data['close'] / self.data['open'] - 1
-        if verbose >= 1: print('Generating lookback features...')        
-        for i in range(1, lookback + 1):
-            self.data[f'percentChange-{i}'] = self.data['percentChangeOH'].shift(-lookback)
+        if pc:
+            self.data['percentChangeOC'] = self.data['close'] / self.data['open'] - 1
+            if verbose >= 1: print('Generating lookback features...')        
+            for i in range(1, lookback + 1):
+                self.data[f'percentChange-{i}'] = self.data['percentChangeOH'].shift(-lookback)
         if verbose >= 1: print('Scaling data...')
         self.data = pd.DataFrame(scale(X=self.data), index=self.data.index, columns=self.data.columns)
     
-    def _train_test_split(self, test_percent=0.15):
+    def _train_test_split(self, test_percent=0.1):
         self.X = self.data.loc[:, self.data.columns != self.target]
         self.y = self.data.loc[:, self.data.columns == self.target]
         test_size = int(len(self.data) * test_percent)
@@ -83,11 +84,13 @@ class StockDataGenerator(object):
         self.y_train = y_train.to_numpy()
         self.X_test = X_test.to_numpy()
         self.y_test = y_test.to_numpy()
+        self.plot_features(features=self.features)
 
     def _generate_window():
         # TODO:
         pass
 
-    def plot_features(features: list):
-        # TODO:
-        pass
+    def plot_features(self, features: list):
+        fig = plt.figure(figsize=(12, 8))
+        plt.plot(self.y_train)
+        plt.savefig('data/TDA/example.png')
