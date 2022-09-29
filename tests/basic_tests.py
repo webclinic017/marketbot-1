@@ -11,7 +11,7 @@ import os
 
 class TestBasics(unittest.TestCase):
     ''' Basic tests for various smaller components of the software '''
-    @unittest.skip('in order to minimize API calls')
+    # @unittest.skip('in order to minimize API calls')
     def testGetData(self):
         tda_client = client_connect('TDA', 'private/creds.ini')
         self.assertEqual(type(tda_client), Client)
@@ -20,8 +20,8 @@ class TestBasics(unittest.TestCase):
                         period='TEN_YEAR', period_type='YEAR', 
                         frequency='DAILY', frequency_type='DAILY',
                         features= { 
-                            'EMA': {}, 'BBANDS': {}
-                        }, api='TDA', save=False)
+                            'EMA': {}, '%B': {}
+                        }, api='TDA', save=True, save_path='data/TDA/example.csv')
         if verbose > 0: print(data)
         tda_client.session.close()
 
@@ -49,6 +49,7 @@ class TestPipeline(unittest.TestCase):
             data_path='data/TDA/example.csv',
             verbose=verbose, target='close'
         )
+        if verbose > 0: print(data.data)
         lstm = LongShortTermMemory()
         lstm.compile_model(data.X_train, verbose=verbose)
         lstm.train_model(data.X_train, data.y_train, epochs=50, verbose=1)

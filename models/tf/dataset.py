@@ -51,7 +51,7 @@ class StockDataGenerator(object):
 
         self.num_features = len(self.data.columns) - 1 
         self.target = target
-        self._process_dataset()
+        self._process_dataset(pc=False)
         self._train_test_split()
         self.verbose = verbose
 
@@ -62,12 +62,13 @@ class StockDataGenerator(object):
 
     def get_num_features(self): return self.num_features
 
-    def _process_dataset(self, lookback=0, normalization=True, verbose=0):
+    def _process_dataset(self, lookback=0, normalization=True, verbose=0, pc=True):
         if verbose >= 1: print('Normalizing data...')
-        self.data['percentChangeOC'] = self.data['close'] / self.data['open'] - 1
-        if verbose >= 1: print('Generating lookback features...')        
-        for i in range(1, lookback + 1):
-            self.data[f'percentChange-{i}'] = self.data['percentChangeOH'].shift(-lookback)
+        if pc:
+            self.data['percentChangeOC'] = self.data['close'] / self.data['open'] - 1
+            if verbose >= 1: print('Generating lookback features...')        
+            for i in range(1, lookback + 1):
+                self.data[f'percentChange-{i}'] = self.data['percentChangeOH'].shift(-lookback)
         if verbose >= 1: print('Scaling data...')
         self.data = pd.DataFrame(scale(X=self.data), index=self.data.index, columns=self.data.columns)
     

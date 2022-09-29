@@ -1,3 +1,4 @@
+from tabnanny import verbose
 import tensorflow as tf
 from tensorflow.keras.layers import LSTM, Dropout, Dense
 from tensorflow.keras.losses import Huber 
@@ -23,8 +24,8 @@ class LongShortTermMemory(tf.keras.Model):
     @property
     def callbacks(self):
         callbacks = [
-            tf.keras.callbacks.EarlyStopping(monitor='loss', patience=5, mode='min', verbose=1), 
-            tf.keras.callbacks.ModelCheckpoint(filepath='models/tf/checkpoints/model.{epoch:02d}-{loss:.2f}.h5'),
+            # tf.keras.callbacks.EarlyStopping(monitor='loss', patience=5, mode='min', verbose=1), 
+            tf.keras.callbacks.ModelCheckpoint(filepath='models/tf/checkpoints/model.{epoch:02d}-{loss:.4f}.h5', verbose=1),
         ]
         return callbacks
 

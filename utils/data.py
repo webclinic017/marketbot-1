@@ -13,7 +13,7 @@ from tqdm import tqdm
 import multiprocessing as mp
 import os
 
-def get_data(client : Union[TDA_Client, CB_Client, POLY_CLIENT ], features : dict, api : str, symbol: str, normalize=True, save=False, log=False, **kwargs):
+def get_data(client : Union[TDA_Client, CB_Client, POLY_CLIENT ], features : dict, api : str, symbol: str, normalize=True, save=False, save_path='', log=False, **kwargs):
     '''
         Args:
             client
@@ -368,13 +368,22 @@ def get_data(client : Union[TDA_Client, CB_Client, POLY_CLIENT ], features : dic
     end_date = str(end_date)
     
     if save:
-        if os.path.exists(f'data/{api}/{symbol}/'):
-            DataFrame.to_csv(df, f'data/{api}/{symbol}/{symbol}_{start_date}_{end_date}.csv')
-            return df, f'data/{api}/{symbol}/{symbol}_{start_date}_{end_date}.csv'
+        if save_path == '':
+            if os.path.exists(f'data/{api}/{symbol}/'):
+                DataFrame.to_csv(df, f'data/{api}/{symbol}/{symbol}_{start_date}_{end_date}.csv')
+                return df, f'data/{api}/{symbol}/{symbol}_{start_date}_{end_date}.csv'
+            else:
+                os.makedirs(f'data/{api}/{symbol}/')
+                DataFrame.to_csv(df, f'data/{api}/{symbol}/{symbol}_{start_date}_{end_date}.csv')
+                return df, f'data/{api}/{symbol}/{symbol}_{start_date}_{end_date}.csv'
         else:
-            os.makedirs(f'data/{api}/{symbol}/')
-            DataFrame.to_csv(df, f'data/{api}/{symbol}/{symbol}_{start_date}_{end_date}.csv')
-            return df, f'data/{api}/{symbol}/{symbol}_{start_date}_{end_date}.csv'
+            if os.path.exists(f'data/{api}/'): 
+                DataFrame.to_csv(df, save_path)
+                return df, save_path
+            else: 
+                os.mkdir(f'data/{api}/')
+                DataFrame.to_csv(df, save_path)
+                return df, save_path
     else:
         return df
     # TODO: polygon.io API compatbility
