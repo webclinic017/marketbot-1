@@ -3,7 +3,6 @@ from tensorflow.keras.layers import LSTM, Dropout, Dense
 from tensorflow.keras.losses import Huber 
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras import Sequential
-import matplotlib.pyplot as plt
 
 
 class LongShortTermMemory(tf.keras.Model):
@@ -24,12 +23,12 @@ class LongShortTermMemory(tf.keras.Model):
     @property
     def callbacks(self):
         callbacks = [
-            # tf.keras.callbacks.EarlyStopping(monitor='loss', patience=5, mode='min', verbose=1), 
-            tf.keras.callbacks.ModelCheckpoint(filepath='models/tf/checkpoints/model.{epoch:02d}-{loss:.2f}.h5', save_freq=5),
+            tf.keras.callbacks.EarlyStopping(monitor='loss', patience=5, mode='min', verbose=1), 
+            tf.keras.callbacks.ModelCheckpoint(filepath='models/tf/checkpoints/model.{epoch:02d}-{loss:.2f}.h5'),
         ]
         return callbacks
 
-    def compile_model(self, X_train, prediction_range=100, optimizer=tf.keras.optimizers.Adam(), loss='huber', verbose=0) -> tf.keras.Model:
+    def compile_model(self, X_train, prediction_range=100, optimizer='Adam', loss='huber', verbose=0) -> tf.keras.Model:
         model = Sequential()
         
         # 1st LSTM layer
@@ -74,30 +73,11 @@ class LongShortTermMemory(tf.keras.Model):
     def train_model(self, X_train, y_train, epochs=25, verbose=0):
         if self.model is None:
             raise TypeError('Model has not been created yet! (received None type as input to trainer)')
-        self.train_log = self.model.fit(X_train, y_train, epochs=epochs, verbose=verbose, callbacks=self.callbacks)
-        if verbose > 0: self._plot_train_helper(epochs)
-   
-    def _plot_train_helper(self, epochs):
-        epochs = [ i for i in range(epochs) ]
-        fig, ax = plt.subplots(2, 2)
-        fig.tight_layout()
-
-        ax[0][0].set_title('Training Loss')
-        ax[0][0].plot(epochs, self.train_log.history['loss'])
-        
-        ax[0][1].set_title('Training MSE')
-        ax[0][1].plot(epochs, self.train_log.history['mse'])
-
-        ax[1][0].set_title('Training MAE')
-        ax[1][0].plot(epochs, self.train_log.history['mae'])
-
-        ax[1][1].set_title('Training RMSE')
-        ax[1][1].plot(epochs, self.train_log.history['rmse'])
-
-        fig.savefig('models/logs/train_metrics.png')
+        history = self.model.fit(X_train, y_train, epochs=epochs, verbose=verbose, callbacks=self.callbacks)
 
     def test_model(self, X_test, y_test, verbose=0):
         self.model.evaluate(X_test, y_test, verbose=verbose, callbacks=self.callbacks)
 
-
-    
+    def plot_train_metrics(self):
+        # TODO:
+        pass
