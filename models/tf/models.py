@@ -1,28 +1,34 @@
-from unicodedata import bidirectional
 import tensorflow as tf
 from tensorflow.keras.layers import LSTM, Dropout, Dense
-from tensorflow.keras.metrics import RootMeanSquaredError 
+from tensorflow.keras.losses import Huber 
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras import Sequential
 
-class LongShortTermMemory(tf.Module):
-    def __init__(self, loss='rmse', opt='Adam', target='close'):
+
+class LongShortTermMemory(tf.keras.Model):
+    def __init__(self, loss='rmse', opt='Adam', target='percentChangeOC'):
         self.target = target
         self.model = None
+        super().__init__()
 
-    def get_callbacks(self):
+    @property
+    def metrics(self):
+        metrics = [ 
+            tf.keras.metrics.MeanSquaredError(name='mse'), 
+            tf.keras.metrics.MeanAbsoluteError(name='mae'),
+            tf.keras.metrics.RootMeanSquaredError(name='rmse')
+        ]
+        return metrics
+    
+    @property
+    def callbacks(self):
         callbacks = [
-            tf.keras.callbacks.EarlyStopping(monitor='MSE', patience=3, mode='min', verbose=1), 
-            tf.keras.callbacks.ModelCheckpoint(filepath='model.{epoch:02d}-{val_loss:.2f}.h5')
+            tf.keras.callbacks.EarlyStopping(monitor='loss', patience=5, mode='min', verbose=1), 
+            tf.keras.callbacks.ModelCheckpoint(filepath='models/tf/checkpoints/model.{epoch:02d}-{loss:.2f}.h5'),
         ]
         return callbacks
 
-    def get_metrics(self):
-        metrics = [ tf.keras.metrics.MeanSquaredError(name='MSE'), 
-                    tf.keras.metrics.MeanAbsoluteError(name='MAE') ]
-        return metrics
-
-    def create_model(self, X_train, prediction_range=100, verbose=0) -> tf.keras.Model:
+    def compile_model(self, X_train, prediction_range=100, optimizer='Adam', loss='huber', verbose=0) -> tf.keras.Model:
         model = Sequential()
         
         # 1st LSTM layer
@@ -60,20 +66,17 @@ class LongShortTermMemory(tf.Module):
         # Dense layer that specifies an output of one unit
         model.add(Dense(units=1))
 
-        if verbose > 1: model.summary()
+        if verbose > 0: model.summary()
         self.model = model
+        self.model.compile(optimizer=optimizer, loss=loss, metrics=self.metrics)
 
-    def train_model(self, X_train, y_train, epochs=10, batches=32, verbose=0):
+    def train_model(self, X_train, y_train, epochs=25, verbose=0):
         if self.model is None:
             raise TypeError('Model has not been created yet! (received None type as input to trainer)')
-        loss = RootMeanSquaredError()
-        opt = Adam()
-        self.model.compile(opt, loss, metrics=self.get_metrics())
-        history = self.model.fit(X_train, y_train, batch_size=32, epochs=25, verbose=1 if verbose else 0)
+        history = self.model.fit(X_train, y_train, epochs=epochs, verbose=verbose, callbacks=self.callbacks)
 
-    def test_model(self):
-        # TODO:
-        pass
+    def test_model(self, X_test, y_test, verbose=0):
+        self.model.evaluate(X_test, y_test, verbose=verbose, callbacks=self.callbacks)
 
     def plot_train_metrics(self):
         # TODO:

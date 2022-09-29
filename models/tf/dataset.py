@@ -1,7 +1,6 @@
+from dataclasses import dataclass
 from typing import Any
-import tensorflow as tf
 import pandas as pd
-import numpy as np
 from datetime import datetime as dt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import scale
@@ -10,8 +9,9 @@ from api.creds import client_connect
 from utils.data import get_data
 import os 
 
+@dataclass
 class StockDataGenerator(object):
-    def __init__(self, symbol=None, api='', data_path='\n', features={}, 
+    def __init__(self, symbol=None, api='', data_path='', features={}, 
                  target='close', num_steps=30, test_ratio=0.15, normalized=True,
                  close_price_only=True, verbose=0, period: Any=None, 
                  period_type: Any=None, frequency: Any=None, frequency_type: Any=None, 
@@ -30,7 +30,7 @@ class StockDataGenerator(object):
         self.frequency_type = frequency_type
         self.save = save
 
-        if api != '':
+        if data_path == '':
             if self.api == 'TDA':
                 self.client = client_connect(self.api, 'private/creds.ini')
             if self.save == True:
@@ -52,6 +52,7 @@ class StockDataGenerator(object):
         self.num_features = len(self.data.columns) - 1 
         self.target = target
         self._process_dataset()
+        self._train_test_split()
         self.verbose = verbose
 
     def info(self):
@@ -61,23 +62,28 @@ class StockDataGenerator(object):
 
     def get_num_features(self): return self.num_features
 
-    def _process_dataset(self, lookback=2, normalization=True, test_percent=0.25, verbose=0):
+    def _process_dataset(self, lookback=0, normalization=True, verbose=0):
         if verbose >= 1: print('Normalizing data...')
-        self.data['percentChange'] = self.data['close'] / self.data['open'] - 1
+        self.data['percentChangeOC'] = self.data['close'] / self.data['open'] - 1
         if verbose >= 1: print('Generating lookback features...')        
         for i in range(1, lookback + 1):
-            self.data[f'percentChange-{i}'] = self.data['percentChange'].shift(-lookback)
+            self.data[f'percentChange-{i}'] = self.data['percentChangeOH'].shift(-lookback)
         if verbose >= 1: print('Scaling data...')
         self.data = pd.DataFrame(scale(X=self.data), index=self.data.index, columns=self.data.columns)
-        X = self.data.loc[:, self.data.columns != self.target]
-        y = self.data.loc[:, self.data.columns == self.target]
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_percent, random_state=42)
+    
+    def _train_test_split(self, test_percent=0.15):
+        self.X = self.data.loc[:, self.data.columns != self.target]
+        self.y = self.data.loc[:, self.data.columns == self.target]
+        test_size = int(len(self.data) * test_percent)
+        X_train = self.X.head(len(self.X) - test_size)
+        y_train = self.y.head(len(self.y) - test_size)
+        X_test = self.X.head(test_size)
+        y_test = self.y.head(test_size)
         self.X_train = X_train.to_numpy()
         self.y_train = y_train.to_numpy()
         self.X_test = X_test.to_numpy()
         self.y_test = y_test.to_numpy()
-        return X_train, y_train, X_test, y_test
-    
+
     def _generate_window():
         # TODO:
         pass

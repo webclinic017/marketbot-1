@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 *.ipynb
 TODO.md
+models/tf/checkpoints/*
 
 # C extensions
 *.so

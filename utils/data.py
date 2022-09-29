@@ -348,6 +348,16 @@ def get_data(client : Union[TDA_Client, CB_Client, POLY_CLIENT ], features : dic
                 vars['CDLUPSIDEGAP2CROWS'] = ta.CDLUPSIDEGAP2CROWS(vars['open'], vars['high'], vars['low'], vars['close'])
             elif func == 'CDLXSIDEGAP3METHODS':
                 vars['CDLXSIDEGAP3METHODS'] = ta.CDLXSIDEGAP3METHODS(vars['open'], vars['high'], vars['low'], vars['close'])
+        elif func == '%B':
+            if 'UPPER_BBAND' not in vars.keys():
+                upperband, middleband, lowerband = ta.BBANDS(vars['close'], **params)
+                vars['%B'] = (vars['close'] - lowerband) / (upperband - lowerband)
+            else: 
+                vars['%B'] = (vars['close'] - vars['LOWER_BBAND']) / (vars['UPPER_BBAND'] - vars['LOWER_BBAND'])
+
+
+
+            
 
     df = DataFrame.from_dict(vars)
     df = df.dropna()            # this often drops some rows since the time range given to the technical indicators go past the data.
