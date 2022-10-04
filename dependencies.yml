@@ -2,6 +2,9 @@ name: marketbot-env
 dependencies:
 - pip
 - python>=3.8, <3.10
+- pip:
+  - cudatoolkit
+  - cudnn
 - pandas
 - tensorflow
 - pytest
@@ -19,3 +22,6 @@ dependencies:
   - tda-api
   - coinbase
   - fredapi
+  - scikeras
+  # - cudatoolkit
+  # - cudnn

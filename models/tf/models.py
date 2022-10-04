@@ -2,28 +2,27 @@ from cProfile import label
 from math import sqrt, floor
 import tensorflow as tf
 from tensorflow.keras.layers import LSTM, Bidirectional, Dropout, Dense
-from tensorflow.keras.losses import Huber 
+from tensorflow.keras.losses import Huber
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras import Sequential
 from matplotlib import pyplot as plt
 import numpy as np
 from queue import Queue
 import sys
+import shap
 
-class NNRegressor(tf.keras.Model):
-    def __init__(self):
+class LongShortTermMemory(tf.keras.Model):
+    def __init__(self, loss='mse', opt='Adam', target='close', enable_checkpoints=False):
         super().__init__()
-
-class LongShortTermMemory(NNRegressor):
-    def __init__(self, loss='rmse', opt='Adam', target='percentChangeOC'):
         self.target = target
         self.model = None
-        super().__init__()
+        self.loss = loss
+        self.optimizer = opt
+        self.enable_checkpoints = enable_checkpoints
 
     @property
     def metrics(self):
         metrics = [  
-            tf.keras.metrics.MeanSquaredError(name='mse'),
             tf.keras.metrics.MeanAbsoluteError(name='mae'),
             tf.keras.metrics.RootMeanSquaredError(name='rmse')
         ]
@@ -33,15 +32,20 @@ class LongShortTermMemory(NNRegressor):
     def callbacks(self):
         callbacks = [
             # tf.keras.callbacks.EarlyStopping(monitor='loss', patience=5, mode='min', verbose=1), 
-            tf.keras.callbacks.ModelCheckpoint(filepath='models/tf/checkpoints/model.{epoch:02d}-{loss:.4f}.h5', verbose=self.callback_verbose),
         ]
+        if self.enable_checkpoints:
+            tf.keras.callbacks.ModelCheckpoint(
+                filepath='models/tf/checkpoints/model.{epoch:02d}-{loss:.4f}.h5', 
+                verbose=self.callback_verbose
+            )
         return callbacks
      
-    def info(self):
+    def info(self, summary=True): 
         self.model.summary()
+        return 
 
-    def compile_model(self, X_train, prediction_range=100, optimizer='Adam', loss='huber', verbose=0) -> tf.keras.Model:
-        model = Sequential()
+    def compile_model(self, X_train, prediction_range=100, verbose=0, name=None) -> tf.keras.Model:
+        model = Sequential(name=name)
         
         # 1st LSTM layer
         # * units = add prediction_range number of neurons (the dimensionality of the output space)
@@ -80,7 +84,7 @@ class LongShortTermMemory(NNRegressor):
 
         if verbose > 0: model.summary()
         self.model = model
-        self.model.compile(optimizer=optimizer, loss=loss, metrics=self.metrics)
+        self.model.compile(optimizer=self.optimizer, loss=self.loss, metrics=self.metrics)
         return self.model
 
     def train_model(self, X_train, y_train, X_val=None, y_val=None, plot_metrics=False, epochs=25, verbose=0):
@@ -102,6 +106,7 @@ class LongShortTermMemory(NNRegressor):
         if plot_metrics == True:
             self.plot_train_results()
             self.show_train_pred(X_train, y_train)
+            self.get_shap(X_train, X_val)
 
     def test_model(self, X_test, y_test, verbose=0):
         self.test_metrics = self.model.evaluate(X_test, y_test, verbose=verbose, callbacks=self.callbacks)
@@ -197,5 +202,10 @@ class LongShortTermMemory(NNRegressor):
                             ax[r][c].set_title(f'Training {metric}')
                             ax[r][c].plot(epochs, self.train_history.history[metric])
 
-        fig.savefig('models/logs/train_graphs.png')
+        fig.savefig(f'models/logs/train_graphs_{self.model.name}.png')
         return fig
+
+    def get_shap(self, X_train, X_test):
+        explainer = shap.DeepExplainer(self.model, X_train[:])
+        shap_values = explainer.shap_values(X_test[:])
+        shap.summary_plot(shap_values, X_train)

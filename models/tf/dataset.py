@@ -112,3 +112,6 @@ class StockDataGenerator(object):
         pca = PCA(n_components)
         pca.fit(self.X_train)
         # TODO:
+    
+    def fit():
+        

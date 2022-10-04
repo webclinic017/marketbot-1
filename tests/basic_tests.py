@@ -10,7 +10,7 @@ import sys
 import os
 
 
-# @unittest.skip('')
+@unittest.skip('')
 class TestBasics(unittest.TestCase):
     ''' Basic tests for various smaller components of the software '''
     def testGetData(self):
@@ -42,7 +42,7 @@ class TestPipeline(unittest.TestCase):
         if verbose > 0: print('\n', data.data)
         self.assertEqual(type(data), StockDataGenerator)
     
-    @unittest.skip('')
+    # @unittest.skip('')
     def testModelCompileTrain(self):
         print('\n')
         data = StockDataGenerator(
@@ -53,7 +53,7 @@ class TestPipeline(unittest.TestCase):
         if verbose > 0: print(data.data)
         lstm = LongShortTermMemory()
         lstm.compile_model(data.X_train, verbose=verbose)
-        lstm.train_model(data.X_train, data.y_train, epochs=50, verbose=1)
+        lstm.train_model(data.X_train, data.y_train, epochs=25, verbose=verbose, plot_metrics=True)
 
 if __name__ == '__main__':
     verbose = 1 if '-v' in sys.argv else 0
