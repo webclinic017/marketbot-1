@@ -16,7 +16,6 @@ pipe1 = Pipeline([
     ('lstm', lstm)
 ])
 params1 = {
-    'lstm__validation_data': (data.X_test, data.y_test),
     'lstm__epochs': 25, 'lstm__verbose': 1
 }
 pipe1.fit(data.X_train, data.y_train, **params1)

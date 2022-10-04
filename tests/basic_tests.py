@@ -18,10 +18,10 @@ class TestBasics(unittest.TestCase):
         self.assertEqual(type(tda_client), Client)
         if verbose > 0: print('\n[ TD Ameritrade API, Symbol: BLK ]')
         data = get_data(tda_client, symbol='BLK', 
-                        period='ONE_YEAR', period_type='YEAR', 
+                        period='TEN_YEAR', period_type='YEAR', 
                         frequency='DAILY', frequency_type='DAILY',
                         features= { 
-                            'EMA': {}, '%B': {}, 'MIDPOINT': {}, 'CCI': {}, 'RSI': {}, 'VIX': {}
+                            'EMA': {}, '%B': {}, 'MIDPOINT': {}, 'CCI': {}, 'RSI': {}, 'VIX': {}, 'AROONOSC': {}
                         }, api='TDA', save=True, save_path='data/TDA/example.csv')
         if verbose > 0: print(data)
         tda_client.session.close()
@@ -42,7 +42,7 @@ class TestPipeline(unittest.TestCase):
         if verbose > 0: print('\n', data.data)
         self.assertEqual(type(data), StockDataGenerator)
     
-    # @unittest.skip('')
+    @unittest.skip('')
     def testModelCompileTrain(self):
         print('\n')
         data = StockDataGenerator(

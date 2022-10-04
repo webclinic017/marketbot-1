@@ -16,7 +16,7 @@ class StockDataGenerator(object):
                  target='close', num_steps=30, test_ratio=0.15, normalized=True,
                  close_price_only=True, verbose=0, period: Any=None, 
                  period_type: Any=None, frequency: Any=None, frequency_type: Any=None, 
-                 save=False, **kwargs):
+                 save=False, lookback=0, **kwargs):
         self.symbol = symbol
         self.num_steps = num_steps
         self.test_ratio = test_ratio
@@ -30,6 +30,8 @@ class StockDataGenerator(object):
         self.frequency = frequency
         self.frequency_type = frequency_type
         self.save = save
+        self.verbose = verbose
+        self.lookback = lookback
 
         if data_path == '':
             if self.api == 'TDA':
@@ -38,11 +40,18 @@ class StockDataGenerator(object):
                 self.client = client_connect(self.api, 'private/creds.ini')
 
             if self.api == 'TDA':
-                self.data, self.data_path = get_data(
-                    client=self.client, api=self.api, features=self.features, symbol=self.symbol,
-                    save=self.save, period=self.period, period_type=self.period_type, frequency=self.frequency, 
-                    frequency_type=self.frequency_type 
-                )
+                if self.save:
+                    self.data, self.data_path = get_data(
+                        client=self.client, api=self.api, features=self.features, symbol=self.symbol,
+                        save=self.save, period=self.period, period_type=self.period_type, frequency=self.frequency, 
+                        frequency_type=self.frequency_type 
+                    )
+                else:
+                    self.data = get_data(
+                        client=self.client, api=self.api, features=self.features, symbol=self.symbol,
+                        save=self.save, period=self.period, period_type=self.period_type, frequency=self.frequency, 
+                        frequency_type=self.frequency_type 
+                    )
             elif self.api == 'POLY':
                 self.data, self.data_path = get_data(
                     client=self.client, api=self.api, 
@@ -55,9 +64,8 @@ class StockDataGenerator(object):
 
         self.num_features = len(self.data.columns) - 1 
         self.target = target
-        self._process_dataset(pc=False)
+        self._process_dataset()
         self._train_test_split()
-        self.verbose = verbose
 
     def info(self):
         return "StockDataSet [%s] train: %d test: %d" % (
@@ -66,14 +74,14 @@ class StockDataGenerator(object):
 
     def get_num_features(self): return self.num_features
 
-    def _process_dataset(self, lookback=0, normalization=True, verbose=0, pc=True):
-        if verbose >= 1: print('Normalizing data...')
+    def _process_dataset(self, normalization=True, pc=True):
+        if self.verbose >= 1: print('Normalizing data...')
         if pc:
             self.data['percentChangeOC'] = self.data['close'] / self.data['open'] - 1
-            if verbose >= 1: print('Generating lookback features...')        
-            for i in range(1, lookback + 1):
-                self.data[f'percentChange-{i}'] = self.data['percentChangeOH'].shift(-lookback)
-        if verbose >= 1: print('Scaling data...')
+            if self.verbose >= 1 and self.lookback > 0: print('Generating lookback features...')        
+            for i in range(1, self.lookback + 1):
+                self.data[f'percentChange-{i}'] = self.data['percentChangeOC'].shift(-self.lookback)
+        if self.verbose >= 1: print('Scaling data...')
         self.data = pd.DataFrame(scale(X=self.data), index=self.data.index, columns=self.data.columns)
     
     def _train_test_split(self, test_percent=0.15):

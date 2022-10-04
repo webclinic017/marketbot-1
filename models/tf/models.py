@@ -1,3 +1,4 @@
+from cProfile import label
 from math import sqrt, floor
 import tensorflow as tf
 from tensorflow.keras.layers import LSTM, Bidirectional, Dropout, Dense
@@ -9,7 +10,11 @@ import numpy as np
 from queue import Queue
 import sys
 
-class LongShortTermMemory(tf.keras.Model):
+class NNRegressor(tf.keras.Model):
+    def __init__(self):
+        super().__init__()
+
+class LongShortTermMemory(NNRegressor):
     def __init__(self, loss='rmse', opt='Adam', target='percentChangeOC'):
         self.target = target
         self.model = None
@@ -95,12 +100,21 @@ class LongShortTermMemory(tf.keras.Model):
                 use_multiprocessing=True)
         
         if plot_metrics == True:
-            self.plot_train_metrics()
+            self.plot_train_results()
+            self.show_train_pred(X_train, y_train)
 
     def test_model(self, X_test, y_test, verbose=0):
         self.test_metrics = self.model.evaluate(X_test, y_test, verbose=verbose, callbacks=self.callbacks)
 
-    def plot_train_metrics(self):
+    def show_train_pred(self, X_train, y_train):
+        y_pred = self.model.predict(X_train)
+        fig = plt.figure(2)
+        plt.plot(range(len(y_train)), y_train, label='y_truth')
+        plt.plot(range(len(y_pred)), y_pred, label='y_pred')
+        plt.legend()
+        plt.show()
+
+    def plot_train_results(self):
         '''
             Algorithm to create a square of plots (with potentially the last row missing)
             one or two graphs. The plots contain the progression of the training metrics 
