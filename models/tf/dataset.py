@@ -114,4 +114,4 @@ class StockDataGenerator(object):
         # TODO:
     
     def fit():
-        
+        pass
