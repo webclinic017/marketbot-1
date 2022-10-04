@@ -6,7 +6,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import scale
 import matplotlib.pyplot as plt
 from api.creds import client_connect
-from utils.data import get_data
+from api.data import get_data
+from sklearn.decomposition import PCA
 import os 
 
 @dataclass
@@ -15,7 +16,7 @@ class StockDataGenerator(object):
                  target='close', num_steps=30, test_ratio=0.15, normalized=True,
                  close_price_only=True, verbose=0, period: Any=None, 
                  period_type: Any=None, frequency: Any=None, frequency_type: Any=None, 
-                 save=False):
+                 save=False, **kwargs):
         self.symbol = symbol
         self.num_steps = num_steps
         self.test_ratio = test_ratio
@@ -33,17 +34,20 @@ class StockDataGenerator(object):
         if data_path == '':
             if self.api == 'TDA':
                 self.client = client_connect(self.api, 'private/creds.ini')
-            if self.save == True:
+            elif self.api == 'POLY':
+                self.client = client_connect(self.api, 'private/creds.ini')
+
+            if self.api == 'TDA':
                 self.data, self.data_path = get_data(
                     client=self.client, api=self.api, features=self.features, symbol=self.symbol,
                     save=self.save, period=self.period, period_type=self.period_type, frequency=self.frequency, 
-                    frequency_type=self.frequency_type, 
+                    frequency_type=self.frequency_type 
                 )
-            else:
-                self.data = get_data(
-                    client=self.client, api=self.api, features=self.features, symbol=self.symbol,
-                    save=self.save, period=self.period, period_type=self.period_type, frequency=self.frequency, 
-                    frequency_type=self.frequency_type
+            elif self.api == 'POLY':
+                self.data, self.data_path = get_data(
+                    client=self.client, api=self.api, 
+                    features=self.features, symbol=self.symbol,
+                    save=self.save, **kwargs
                 )
         else:
             self.data = pd.read_csv(data_path, index_col='datetime')
@@ -89,6 +93,14 @@ class StockDataGenerator(object):
         # TODO:
         pass
 
-    def plot_features(features: list):
+    def plot_features(self, features: list):
+        for feat in features:
+            feat = self.data
+        figures = []
+        for i in self.data.columns.values:
+            pass
+
+    def apply_pca(self, n_components=3):
+        pca = PCA(n_components)
+        pca.fit(self.X_train)
         # TODO:
-        pass

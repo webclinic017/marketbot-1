@@ -18,3 +18,4 @@ dependencies:
   - ta-lib
   - tda-api
   - coinbase
+  - fredapi

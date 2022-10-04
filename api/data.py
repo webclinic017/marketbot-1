@@ -12,6 +12,7 @@ from typing import Union
 from tqdm import tqdm
 import multiprocessing as mp
 import os
+from api.creds import client_connect
 
 def get_data(client : Union[TDA_Client, CB_Client, POLY_CLIENT ], features : dict, api : str, symbol: str, normalize=True, save=False, save_path='', log=False, **kwargs):
     '''
@@ -74,22 +75,34 @@ def get_data(client : Union[TDA_Client, CB_Client, POLY_CLIENT ], features : dic
         }
         payload = { key: val for key, val in params.items() if val != None } 
         data = json.dumps(client.get_price_history(**payload).json(), indent=4)
-    elif isinstance(POLY_CLIENT):
-        # TODO:
-        pass
+    else:
+        data = client.stocks_equities_aggregates(symbol, **kwargs)
 
     '''Extract Features'''
-    data = json.loads(data)    
-    symbol = data['symbol']
-    
-    vars = {
-        'open': np.array([ candle['open'] for candle in data['candles'] ]),
-        'close': np.array([ candle['close'] for candle in data['candles'] ]),
-        'high': np.array([ candle['high'] for candle in data['candles'] ]),
-        'low': np.array([ candle['low'] for candle in data['candles'] ]),
-        'volume': np.array([ candle['volume'] for candle in data['candles'] ]),
-        'datetime': np.array([ pd.to_datetime(candle['datetime'], unit='ms') for candle in data['candles'] ])
-    }
+    if isinstance(client, TDA_Client):
+        data = json.loads(data)
+        symbol = data['symbol']
+    else:
+        data = data.__dict__
+        symbol = data['ticker']
+    if isinstance(client, TDA_Client):
+        vars = {
+            'open': np.array([ candle['open'] for candle in data['candles'] ]),
+            'close': np.array([ candle['close'] for candle in data['candles'] ]),
+            'high': np.array([ candle['high'] for candle in data['candles'] ]),
+            'low': np.array([ candle['low'] for candle in data['candles'] ]),
+            'volume': np.array([ candle['volume'] for candle in data['candles'] ]),
+            'datetime': np.array([ pd.to_datetime(candle['datetime'], unit='ms') for candle in data['candles'] ])
+        }
+    elif isinstance(client, POLY_CLIENT):
+        vars = {
+            'open': np.array([ candle['o'] for candle in data['results'] ]),
+            'close': np.array([ candle['c'] for candle in data['results'] ]),
+            'high': np.array([ candle['h'] for candle in data['results'] ]),
+            'low': np.array([ candle['l'] for candle in data['results'] ]),
+            'volume': np.array([ candle['v'] for candle in data['results'] ]),
+            'datetime': np.array([ pd.to_datetime(candle['t'], unit='ms') for candle in data['results'] ])
+        }
     
     start_date = vars['datetime'][0]
     end_date = vars['datetime'][-1]
@@ -354,10 +367,17 @@ def get_data(client : Union[TDA_Client, CB_Client, POLY_CLIENT ], features : dic
                 vars['%B'] = (vars['close'] - lowerband) / (upperband - lowerband)
             else: 
                 vars['%B'] = (vars['close'] - vars['LOWER_BBAND']) / (vars['UPPER_BBAND'] - vars['LOWER_BBAND'])
+        elif func == 'VIX':
+            fred_client = client_connect('FRED', 'private/creds.ini')
+            temp = fred_client.get_series('VIXCLS')
+            vix = []
+            for date in vars['datetime']:
+                try:
+                    vix.append(temp[f'{date:%Y}-{date:%m}-{date:%d}'])
+                except:
+                    vix.append(None)
+            vars['VIX'] = vix
 
-
-
-            
 
     df = DataFrame.from_dict(vars)
     df = df.dropna()            # this often drops some rows since the time range given to the technical indicators go past the data.

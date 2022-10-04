@@ -4,7 +4,8 @@
 
 * [ ] Coinbase
 * [x] TD Ameritrade
-* [ ] polygon.io
+* [x] polygon.io
+* [x] FRED
 
 ## API CREDS
 

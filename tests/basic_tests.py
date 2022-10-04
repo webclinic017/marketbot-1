@@ -1,4 +1,4 @@
-from utils.data import get_data
+from api.data import get_data
 from api.creds import client_connect
 from tda.client import Client
 from models.tf.dataset import StockDataGenerator
@@ -9,25 +9,26 @@ global verbose
 import sys
 import os
 
+
+# @unittest.skip('')
 class TestBasics(unittest.TestCase):
     ''' Basic tests for various smaller components of the software '''
-    # @unittest.skip('in order to minimize API calls')
     def testGetData(self):
         tda_client = client_connect('TDA', 'private/creds.ini')
         self.assertEqual(type(tda_client), Client)
         if verbose > 0: print('\n[ TD Ameritrade API, Symbol: BLK ]')
         data = get_data(tda_client, symbol='BLK', 
-                        period='TEN_YEAR', period_type='YEAR', 
+                        period='ONE_YEAR', period_type='YEAR', 
                         frequency='DAILY', frequency_type='DAILY',
                         features= { 
-                            'EMA': {}, '%B': {}
+                            'EMA': {}, '%B': {}, 'MIDPOINT': {}, 'CCI': {}, 'RSI': {}, 'VIX': {}
                         }, api='TDA', save=True, save_path='data/TDA/example.csv')
         if verbose > 0: print(data)
         tda_client.session.close()
 
 class TestPipeline(unittest.TestCase):
     ''' Tests for data downloading, feature creation, and basic training pipelines '''
-    @unittest.skip('in order to minimize API calls')
+    @unittest.skip('minimize API calls')
     def testDatasetCompiling(self):
         data = StockDataGenerator(
             'BLK', 'TDA', 

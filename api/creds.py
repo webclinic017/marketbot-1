@@ -6,6 +6,7 @@ from coinbase.wallet.client import Client as CB_Client
 from configparser import ConfigParser
 from typing import Union
 from polygon import RESTClient as POLY_CLIENT
+from fredapi import Fred
 
 def client_connect(api: str, cfg: str, log=False) -> Union[CB_Client, TDA_Client, POLY_CLIENT]:
     '''
@@ -45,4 +46,8 @@ def client_connect(api: str, cfg: str, log=False) -> Union[CB_Client, TDA_Client
     elif api == 'POLY':
         API_KEY = config.get(f'{api}_AUTH', 'API_KEY')
         client = POLY_CLIENT(API_KEY)
+        return client
+    elif api == 'FRED':
+        API_KEY = config.get(f'{api}_AUTH', 'API_KEY')
+        client = Fred(API_KEY)
         return client
