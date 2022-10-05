@@ -1,7 +1,7 @@
 from sklearn.pipeline import Pipeline
 from scikeras.wrappers import KerasRegressor
 from models.tf.models import LongShortTermMemory
-from models.tf.dataset import StockDataGenerator
+from data.dataset import StockDataGenerator
 from sklearn.model_selection import KFold, GridSearchCV
 from joblib import Memory
 

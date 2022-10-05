@@ -1,7 +1,7 @@
 from api.data import get_data
 from api.creds import client_connect
 from tda.client import Client
-from models.tf.dataset import StockDataGenerator
+from data.dataset import StockDataGenerator
 from models.tf.models import LongShortTermMemory
 import unittest
 import tracemalloc as tm
