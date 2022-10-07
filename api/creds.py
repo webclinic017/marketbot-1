@@ -28,6 +28,7 @@ def client_connect(api: str, cfg: str, log=False) -> Union[CB_Client, TDA_Client
     config = ConfigParser()
     config.read(cfg)
     API_KEY = config.get(f'{api}_AUTH', 'API_KEY')
+    
     if api == 'TDA':
         REDIRECT = config.get(f'{api}_AUTH', 'REDIRECT')
         TOKEN_PATH = config.get(f'{api}_AUTH', 'TOKEN_PATH')
@@ -37,7 +38,8 @@ def client_connect(api: str, cfg: str, log=False) -> Union[CB_Client, TDA_Client
             from selenium import webdriver
             with webdriver.Chrome() as driver:
                 client = auth.client_from_login_flow(
-                    driver, API_KEY, REDIRECT, TOKEN_PATH)
+                    driver, API_KEY, REDIRECT, TOKEN_PATH
+                )
         return client
     elif api == 'CB':
         API_SECRET = config.get(f'{api}_AUTH', 'API_SECRET')

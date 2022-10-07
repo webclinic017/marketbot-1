@@ -20,8 +20,11 @@ class ClfSwitcher(BaseEstimator):
 
 
     def predict_proba(self, X):
-        return self.estimator.predict_proba(X)
+        prob = self.estimator.predict_proba(X)
+        return prob
 
 
     def score(self, X, y):
-        return self.estimator.score(X, y)
+        score = self.estimator.score(X, y)
+        print(score)
+        return score
