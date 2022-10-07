@@ -7,11 +7,11 @@ from sklearn.preprocessing import scale
 import matplotlib.pyplot as plt
 from api.creds import client_connect
 from api.data import get_data
-from sklearn.decomposition import PCA
 import os 
 
 @dataclass
 class StockDataGenerator(object):
+
     def __init__(self, symbol=None, api='', data_path='', features={}, 
                  target='close', num_steps=30, test_ratio=0.15, normalized=True,
                  close_price_only=True, verbose=0, period: Any=None, 
@@ -33,6 +33,7 @@ class StockDataGenerator(object):
         self.verbose = verbose
         self.lookback = lookback
 
+
         if data_path == '':
             if self.api == 'TDA':
                 self.client = client_connect(self.api, 'private/creds.ini')
@@ -53,7 +54,7 @@ class StockDataGenerator(object):
                         frequency_type=self.frequency_type 
                     )
             elif self.api == 'POLY':
-                self.data, self.data_path = get_data(
+                self.data = get_data(
                     client=self.client, api=self.api, 
                     features=self.features, symbol=self.symbol,
                     save=self.save, **kwargs
@@ -67,12 +68,15 @@ class StockDataGenerator(object):
         self._process_dataset()
         self._train_test_split()
 
+
     def info(self):
         return "StockDataSet [%s] train: %d test: %d" % (
             self.symbol, len(self.train_X), len(self.test_y)
         )
 
+
     def get_num_features(self): return self.num_features
+
 
     def _process_dataset(self, normalization=True, pc=True):
         if self.verbose >= 1: print('Normalizing data...')
@@ -84,6 +88,7 @@ class StockDataGenerator(object):
         if self.verbose >= 1: print('Scaling data...')
         self.data = pd.DataFrame(scale(X=self.data), index=self.data.index, columns=self.data.columns)
     
+
     def _train_test_split(self, test_percent=0.15):
         self.X = self.data.loc[:, self.data.columns != self.target]
         self.y = self.data.loc[:, self.data.columns == self.target]
@@ -97,9 +102,11 @@ class StockDataGenerator(object):
         self.X_test = X_test.to_numpy()
         self.y_test = y_test.to_numpy()
 
+
     def _generate_window():
         # TODO:
         pass
+
 
     def plot_features(self, features: list):
         for feat in features:
@@ -107,11 +114,6 @@ class StockDataGenerator(object):
         figures = []
         for i in self.data.columns.values:
             pass
-
-    def apply_pca(self, n_components=3):
-        pca = PCA(n_components)
-        pca.fit(self.X_train)
-        # TODO:
     
     def fit():
         pass

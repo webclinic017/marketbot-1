@@ -19,6 +19,7 @@ dependencies:
   - backtrader
   - sklearn
   - ta-lib
+  - shap
   - tda-api
   - coinbase
   - fredapi

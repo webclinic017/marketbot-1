@@ -1,4 +1,3 @@
-from cProfile import label
 from math import sqrt, floor
 import tensorflow as tf
 from tensorflow.keras.layers import LSTM, Bidirectional, Dropout, Dense
@@ -12,6 +11,7 @@ import sys
 import shap
 
 class LongShortTermMemory(tf.keras.Model):
+    
     def __init__(self, loss='mse', opt='Adam', target='close', enable_checkpoints=False):
         super().__init__()
         self.target = target
@@ -19,6 +19,7 @@ class LongShortTermMemory(tf.keras.Model):
         self.loss = loss
         self.optimizer = opt
         self.enable_checkpoints = enable_checkpoints
+
 
     @property
     def metrics(self):
@@ -28,23 +29,28 @@ class LongShortTermMemory(tf.keras.Model):
         ]
         return metrics
     
+
     @property
     def callbacks(self):
         callbacks = [
             # tf.keras.callbacks.EarlyStopping(monitor='loss', patience=5, mode='min', verbose=1), 
         ]
-        if self.enable_checkpoints:
-            tf.keras.callbacks.ModelCheckpoint(
-                filepath='models/tf/checkpoints/model.{epoch:02d}-{loss:.4f}.h5', 
-                verbose=self.callback_verbose
-            )
+        # if self.enable_checkpoints:
+            # callbacks.append(
+            #     tf.keras.callbacks.ModelCheckpoint(
+            #         filepath='models/tf/checkpoints/model.{epoch:02d}-{loss:.4f}.h5', 
+            #         verbose=self.callback_verbose
+            #     )
+            # )
         return callbacks
      
+
     def info(self, summary=True): 
         self.model.summary()
         return 
 
-    def compile_model(self, X_train, prediction_range=100, verbose=0, name=None) -> tf.keras.Model:
+
+    def compile_model(self, X_train, prediction_range=200, verbose=0, name=None) -> tf.keras.Model:
         model = Sequential(name=name)
         
         # 1st LSTM layer
@@ -76,16 +82,17 @@ class LongShortTermMemory(tf.keras.Model):
         # * units = add 50 neurons is the dimensionality of the output space
         model.add(Bidirectional(tf.keras.layers.LSTM(units=prediction_range // 2)))
 
-        # 50% of the layers will be dropped
         model.add(Dropout(0.5))
 
         # Dense layer that specifies an output of one unit
         model.add(Dense(units=1))
 
-        if verbose > 0: model.summary()
+        
         self.model = model
         self.model.compile(optimizer=self.optimizer, loss=self.loss, metrics=self.metrics)
+        if verbose > 0: model.summary()
         return self.model
+
 
     def train_model(self, X_train, y_train, X_val=None, y_val=None, plot_metrics=False, epochs=25, verbose=0):
         self.callback_verbose = verbose 
@@ -108,8 +115,10 @@ class LongShortTermMemory(tf.keras.Model):
             self.show_train_pred(X_train, y_train)
             self.get_shap(X_train, X_val)
 
+
     def test_model(self, X_test, y_test, verbose=0):
         self.test_metrics = self.model.evaluate(X_test, y_test, verbose=verbose, callbacks=self.callbacks)
+
 
     def show_train_pred(self, X_train, y_train):
         y_pred = self.model.predict(X_train)
@@ -118,6 +127,7 @@ class LongShortTermMemory(tf.keras.Model):
         plt.plot(range(len(y_pred)), y_pred, label='y_pred')
         plt.legend()
         plt.show()
+
 
     def plot_train_results(self):
         '''
@@ -145,7 +155,7 @@ class LongShortTermMemory(tf.keras.Model):
         metrics_queue.put('loss')
         for metric in metrics: metrics_queue.put(metric)
         if n == 1:
-            fig = plt.plot(epochs, self.train_history.history['loss'])
+            fig = plt.plot(epochs, self.train_history.history['loss'])  
             plt.savefig('models/logs/train_graphs.png')
             print(fig)
             return fig
@@ -205,7 +215,9 @@ class LongShortTermMemory(tf.keras.Model):
         fig.savefig(f'models/logs/train_graphs_{self.model.name}.png')
         return fig
 
+
     def get_shap(self, X_train, X_test):
         explainer = shap.DeepExplainer(self.model, X_train[:])
         shap_values = explainer.shap_values(X_test[:])
         shap.summary_plot(shap_values, X_train)
+        # TODO:
